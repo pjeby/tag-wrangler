@@ -21,6 +21,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          TAG_NAME=${RELEASE_VER##*/}
           mkdir "${PLUGIN_NAME}"
           assets=()
           for f in main.js manifest.json styles.css; do
@@ -30,4 +31,4 @@ jobs:
             fi
           done
           zip -r "$PLUGIN_NAME".zip "$PLUGIN_NAME"
-          hub release create "${assets[@]}" -a "$PLUGIN_NAME".zip -m "$RELEASE_VER" "$RELEASE_VER"
+          hub release create "${assets[@]}" -a "$PLUGIN_NAME".zip -m "$TAG_NAME" "$TAG_NAME"
