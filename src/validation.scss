@@ -1,0 +1,8 @@
+// Highlight invalid input
+.smalltalk input[pattern] {
+    &:invalid, &[aria-invalid='true'] {
+        &, &:enabled:focus {
+            border-color: red;
+        }
+    }
+}

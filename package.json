@@ -1,0 +1,16 @@
+{
+  "main": "main.js",
+  "name": "tag-wrangler",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "rollup --config rollup.config.js -w",
+    "build": "rollup --config rollup.config.js"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "node-sass": "^5.0.0",
+    "obsidian-rollup-presets": "github:pjeby/obsidian-rollup-presets",
+    "rollup": "^2.38.1",
+    "smalltalk": "^4.0.7"
+  }
+}
