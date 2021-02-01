@@ -17,7 +17,7 @@ Depending on the current state of the search and tag panes, some actions may not
 
 ## Installation
 
-When this is a bit more complete, it will be submitted to the Obsidian plugin registry.  But for now, just visit the Github releases page, download the plugin .zip from the latest release, and unzip it in your vault's `.obsidian/plugins/` directory.  You can then enable it from the Obsidian "Community Plugins" tab for that vault.
+Search for "tag wrangler" in Obsidian's Community Plugins interface, or if it's not there yet, just visit the [Github releases page](https://github.com/pjeby/tag-wrangler/releases), download the plugin .zip from the latest release, and unzip it in your vault's `.obsidian/plugins/` directory.  You can then enable it from the Obsidian "Community Plugins" tab for that vault.
 
 
 
