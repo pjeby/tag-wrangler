@@ -19,7 +19,7 @@ Depending on the current state of the search and tag panes, some actions may not
 
 ## Installation
 
-Currently, the only way to install this plugin is to clone it as a subdirectory of your repo's `.obsidian/plugins/` directory.  In future, it will be available by download, and also submitted to the Obsidian plugin registry.
+When this is a bit more complete, it will be submitted to the Obsidian plugin registry.  But for now, just visit the Github releases page, download the plugin .zip from the latest release, and unzip it in your vault's `.obsidian/plugins/` directory.  You can then enable it from the Obsidian "Community Plugins" tab for that vault.
 
 
 
