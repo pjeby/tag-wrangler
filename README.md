@@ -1,6 +1,6 @@
 # Obsidian Tag Wrangler Plugin
 
-This plugin adds a context menu for tags in the tag pane, with the following actions available:
+This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.md) tag pane, with the following actions available:
 
 * [Rename the tag](#renaming-tags) (and all its subtags)
 * Start a new search for the tag (similar to a plain click)
