@@ -2197,7 +2197,7 @@ fsevents@~2.1.2:
 
 "obsidian-rollup-presets@github:pjeby/obsidian-rollup-presets":
   version: 0.1.0
-  resolution: "obsidian-rollup-presets@https://github.com/pjeby/obsidian-rollup-presets.git#commit=c4736737313e388e9191b6116e28939998458128"
+  resolution: "obsidian-rollup-presets@https://github.com/pjeby/obsidian-rollup-presets.git#commit=0da0645c4c6eab44aaf5e4ea11d1695ee80e5823"
   dependencies:
     "@rollup/plugin-commonjs": ^17.1.0
     "@rollup/plugin-node-resolve": ^11.1.1
@@ -2210,7 +2210,7 @@ fsevents@~2.1.2:
   peerDependenciesMeta:
     node-sass:
       optional: true
-  checksum: 1110089f8fabf67243f3e2d52a314a47cf7dbdb1b64e470f90ad26e6ca24dae9d3ad5599c8accbb16d0c3047ffe31a21a55160f824b4cbee454010d6291dd207
+  checksum: a2ea122793678a2f66465c3aa80e6f81620d3fafdacb183f28d15ec2bd5e305ace9f72755916098de4f58fd9af99624ce92131ed03338d9fd4fcd7ee6dc99cd8
   languageName: node
   linkType: hard
 
@@ -3473,6 +3473,7 @@ fsevents@~2.1.2:
     obsidian-rollup-presets: "github:pjeby/obsidian-rollup-presets"
     rollup: ^2.38.1
     smalltalk: ^4.0.7
+    yaml: next
   languageName: unknown
   linkType: soft
 
@@ -3702,6 +3703,13 @@ fsevents@~2.1.2:
   version: 1.10.0
   resolution: "yaml@npm:1.10.0"
   checksum: d4cc9f9724f8d0aebc2cf52e4e6aa7059f12d50deb54b5225d103462fb2af36e5c0bb419101ca4b1f0cd3b4db9e4139cf2c690e863ac6227648d39d6f4e2522c
+  languageName: node
+  linkType: hard
+
+"yaml@npm:next":
+  version: 2.0.0-3
+  resolution: "yaml@npm:2.0.0-3"
+  checksum: fc142270799e224ec74022c4ba99efabac26d194fd75c8e682540b434b64e590854a3174b9ea8d014379612fab0b74c5e0a93f76c8880e4c03c92a13aa05d30d
   languageName: node
   linkType: hard
 

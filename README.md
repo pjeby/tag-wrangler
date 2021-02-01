@@ -13,8 +13,6 @@ Depending on the current state of the search and tag panes, some actions may not
 
 **Please note**: renaming a tag is potentially an irreversible operation: you may wish to back up your data before beginning a rename.  See the section on [Renaming tags](#renaming-tags) below for more information.
 
-(Also note: the current version only supports renaming tags in the body of a *note*, not the ones that appear in front matter field(s). That's coming in a future release.)
-
 
 
 ## Installation
@@ -44,3 +42,7 @@ So for example, if you rename `#x/y` to `#a/b`, then a tag that was previously n
 If you want to refactor your tag hierarchy, note that you can rename a tag and its children to have either more or fewer path parts than it did before.  That is, you can rename `#x/y` to just `#x`, and then your `#x/y/z` tag will become `#x/z`.  Or conversely, you can rename `#x/y` to `#letters/x/y`, which will move `#x/y/z` to `#letters/x/y/z`.
 
 Many possibilities are available for refactoring your tags.  Just be sure to make a backup before you start, keep track of what you're changing, and check on the results before you sync or commit your changes.
+
+### Front Matter
+
+Obsidian allows tags to be specified as part of a note's YAML front matter.  Tag Wrangler will attempt to rename these as well as those found in a note's body.  However, due to limitations of the parser involved, some whitespace in the front matter may be removed or reduced.  In particular, runs of more than one blank line between values are reduced to single blank lines, and spaces between a value and a comment may be similarly reduced in number.  (Most other formatting should remain intact, however, and whitespace that is part of a YAML value will be unaffected.)

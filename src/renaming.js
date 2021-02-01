@@ -2,6 +2,7 @@ import {confirm} from "smalltalk";
 import {Progress} from "./progress";
 import {validatedInput} from "./validation";
 import {Notice, parseFrontMatterTags} from "obsidian";
+import {parseDocument} from "yaml";
 
 export async function renameTag(app, tagName) {
     var newName;
@@ -50,6 +51,29 @@ This <b>cannot</b> be undone.  Do you wish to proceed?`); }
             }
             text = text.slice(0, start.offset) + "#"+newName + text.slice(start.offset + tagName.length + 1)
         }
+        if (f.fmtags) {
+            const [empty, original] = text.split(/---\r?\n/, 2);
+            if (empty === "" && original.trim() !== "" && original.endsWith("\n")) {
+                const parsed = parseDocument(original);
+                let changed = false;
+                for (const prop of ["tag", "tags"] ) {
+                    const node = parsed.get(prop, true);
+                    if (!node) continue;
+                    const field = node.toJSON();
+                    if (!field || !field.length) continue;
+                    if (typeof field === "string") {
+                        const parts = field.split(/(\s*,\s*|^\s+|\s+$)/);
+                        const after = replaceTags(parts, tagName, newName, true).join("");
+                        if (field != after) { parsed.set(prop, after); changed = true; }
+                    } else if (Array.isArray(field)) {
+                        replaceTags(field, tagName, newName).forEach((v,i) => {
+                            if ( field[i] !== v ) node.set(i,v); changed = true;
+                        });
+                    }
+                }
+                if (changed) text = text.replace(original, parsed.toString());
+            }
+        }
         if (text !== original) { await app.vault.modify(file, text); updated++; }
     })
     return new Notice(`Operation ${progress.aborted ? "cancelled" : "complete"}: ${updated} file(s) updated`);
@@ -88,4 +112,16 @@ async function tagPositions(app, tagName) {
     );
     if (!progress.aborted)
         return result;
+}
+
+function replaceTags(tags, tagName, newName, skipOdd) {
+    const tagPath = tagName+"/", hashTag = "#"+tagName, hashPath = "#"+tagPath;
+    return tags.map((t,i) => {
+        if (skipOdd && (i & 1)) return t;  // leave odd entries alone
+        if (t === tagName) return newName;
+        if (t === hashTag) return "#" + newName;
+        if (t.startsWith(tagPath)) return newName+t.slice(tagName.length);
+        if (t.startsWith(hashPath)) return newName+t.slice(hashTag.length);
+        return t;
+    })
 }

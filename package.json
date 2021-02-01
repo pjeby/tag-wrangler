@@ -11,6 +11,7 @@
     "node-sass": "^5.0.0",
     "obsidian-rollup-presets": "github:pjeby/obsidian-rollup-presets",
     "rollup": "^2.38.1",
-    "smalltalk": "^4.0.7"
+    "smalltalk": "^4.0.7",
+    "yaml": "next"
   }
 }
