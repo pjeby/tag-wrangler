@@ -72,15 +72,6 @@ async function tagPositions(app, tagName) {
     function tagMatches(tag) {
         return tag == tagName || tag.startsWith(prefix);
     }
-    function frontMatterTags(fm) {
-        if (!fm || !fm.tags)
-            return [];
-        if (Array.isArray(fm.tags))
-            return fm.tags;
-        if (typeof fm.tags === "string")
-            return [fm.tags];
-        return [];
-    }
 
     const progress = new Progress(`Searching for ${prefix}*`, "Matching files...");
     await progress.forEach(
