@@ -1,4 +1,4 @@
-import {Menu, Plugin} from "obsidian";
+import {Menu, Notice, Plugin} from "obsidian";
 import {renameTag} from "./renaming";
 
 function onElement(el, event, selector, callback, options) {
@@ -58,7 +58,10 @@ export default class TagWrangler extends Plugin {
         menu.showAtPosition({x: e.pageX, y: e.pageY});
     }
 
-    rename(tagName) { return renameTag(this.app, tagName); }
+    async rename(tagName) {
+        try { await renameTag(this.app, tagName); }
+        catch (e) { console.error(e); new Notice("error: " + e); }
+    }
 
 }
 

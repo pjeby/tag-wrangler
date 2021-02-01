@@ -1,6 +1,7 @@
 import {confirm} from "smalltalk";
 import {Progress} from "./progress";
 import {validatedInput} from "./validation";
+import {Notice, parseFrontMatterTags} from "obsidian";
 
 export async function renameTag(app, tagName) {
     var newName;
@@ -86,9 +87,9 @@ async function tagPositions(app, tagName) {
         app.metadataCache.getCachedFiles(),
         n => {
             let { frontmatter, tags } = app.metadataCache.getCache(n);
-            tags = tags && tags.filter(t => tagMatches(t.tag)).reverse() || []; // last positions first
+            tags = tags && tags.filter(t => tagMatches(t.tag || "")).reverse() || []; // last positions first
             tags.filename = n;
-            tags.fmtags = frontMatterTags(frontmatter).filter(tagMatches); // XXXX parseFrontMatterTags?
+            tags.fmtags = (parseFrontMatterTags(frontmatter) || []).filter(tagMatches);
             tags.frontmatter = frontmatter;
             if (tags.length || tags.fmtags.length)
                 result.push(tags);

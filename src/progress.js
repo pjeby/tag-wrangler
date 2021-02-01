@@ -10,23 +10,27 @@ export class Progress {
     }
 
     async forEach(collection, func) {
-        if (this.aborted)
-            return;
-        let processed = 0, range = collection.length, accum = 0, pct = 0;
-        for (const item of collection) {
-            await func(item, processed++, collection, this);
+        try {
             if (this.aborted)
                 return;
-            accum += 100;
-            if (accum > range) {
-                const remainder = accum % range, step = (accum - remainder) / range;
-                this.progress.setProgress(pct += step);
-                accum = remainder;
+            let processed = 0, range = collection.length, accum = 0, pct = 0;
+            for (const item of collection) {
+                await func(item, processed++, collection, this);
+                if (this.aborted)
+                    return;
+                accum += 100;
+                if (accum > range) {
+                    const remainder = accum % range, step = (accum - remainder) / range;
+                    this.progress.setProgress(pct += step);
+                    accum = remainder;
+                }
             }
+            if (pct < 100)
+                this.progress.setProgress(100);
+            return this;
+        } finally {
+            this.progress.remove();
         }
-        if (pct < 100)
-            this.progress.setProgress(100);
-        return this;
     }
 
     set title(text) { this.dialog.querySelector("header").textContent = text; }
