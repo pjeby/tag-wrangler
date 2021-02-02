@@ -11,9 +11,6 @@ export default class TagWrangler extends Plugin {
         this.register(
             onElement(document, "contextmenu", ".tag-pane-tag", this.onMenu.bind(this), {capture: true})
         );
-        this.register(
-            onElement(document, "mousedown", ".tag-pane-tag", () => {window.lastFocus = document.activeElement;}, {capture: true})
-        );
     }
 
     onMenu(e, tagEl) {
@@ -73,7 +70,7 @@ class TagMenu extends Menu {
         );
     }
     onKeydown(e) {
-        if (e.key=="Escape") {
+        if (e.key==="Escape") {
             e.preventDefault();
             this.hide();
         }

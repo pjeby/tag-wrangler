@@ -5,17 +5,18 @@ import {Notice, parseFrontMatterTags} from "obsidian";
 import {parseDocument} from "yaml";
 
 export async function renameTag(app, tagName) {
-    var newName;
+
     try {
-        newName = await validatedInput(
-            `Renaming #${tagName} (and any sub-tags)`, "Enter new name (must be a valid Obsidian tag):\n", tagName,
+        var newName = await validatedInput(
+            `Renaming #${tagName} (and any sub-tags)`, "Enter new name (must be a valid Obsidian tag):\n",
+            tagName,
             "[^\u2000-\u206F\u2E00-\u2E7F'!\"#$%&()*+,.:;<=>?@^`{|}~\\[\\]\\\\\\s]+",
             "Obsidian tag name"
         );
-    }
-    catch(e) {
+    } catch(e) {
         return;
     }
+
     if (!newName || newName === tagName) {
         return new Notice("Unchanged or empty tag: No changes made.");
     }
@@ -47,20 +48,23 @@ export async function renameTag(app, tagName) {
 
     let updated = 0;
     await progress.forEach(filesToRename, async (f) => {
+
         progress.message = "Processing " + f.filename.split("/").pop();
         const file = app.vault.getAbstractFileByPath(f.filename);
         const original = await app.vault.read(file);
         if (progress.aborted) return;
+
         let text = original;
         for(const { position: {start, end}, tag} of f) {
             if (text.slice(start.offset, end.offset) !== tag) {
                 new Notice(`File ${f.filename} has changed; skipping`)
                 console.error(`File ${f.filename} has changed; skipping`);
-                console.debug(text.slice(start.offset, end.offset), tag)
+                console.debug(text.slice(start.offset, end.offset), tag);
                 return;
             }
             text = text.slice(0, start.offset) + "#"+newName + text.slice(start.offset + tagName.length + 1)
         }
+
         if (f.fmtags) {
             const [empty, original] = text.split(/---\r?\n/, 2);
             if (empty === "" && original.trim() !== "" && original.endsWith("\n")) {
