@@ -46,3 +46,13 @@ Many possibilities are available for refactoring your tags.  Just be sure to mak
 ### Front Matter
 
 Obsidian allows tags to be specified as part of a note's YAML front matter.  Tag Wrangler will attempt to rename these as well as those found in a note's body.  However, due to limitations of the parser involved, some whitespace in the front matter may be removed or reduced.  In particular, runs of more than one blank line between values are reduced to single blank lines, and spaces between a value and a comment may be similarly reduced in number.  (Most other formatting should remain intact, however, and whitespace that is part of a YAML value will be unaffected.)
+
+### Case Insensitivity
+
+Tag Wrangler uses the same case-insensitive comparison as Obsidian when matching tags to change, and checking for clashes.  Please note, however, that because Obsidian uses the *first* occurrence of a tag to determine how it is displayed in the tag pane, renaming tags without consistent upper/lowercase usage may result in *apparent* changes to the names of "other" tags in the tag pane.
+
+Let's say you have a tag named `#foo/bar`" and you rename `#foo` to `#Bar/baz`.  But in the meantime, you already *had* a tag called `#bar/bell`.  This *might* cause you to now see that tag displayed in the tag pane as `#Bar/bell`, even though Tag Wrangler did not actually replace any existing `#bar/bell` tags in your text!  (As you will see if you search for them.)
+
+Rather, this kind of thing will happen if the `#Bar/baz` tag is the first tag beginning with some variant of `bar` that Obsidian encounters when generating the tag pane.  Obsidian just uses the first-encountered string of a particular case as the "display name" for the tag, and then counts all subsequent occurrences as the same tag.
+
+This is just how Obsidian tags work, and not something that Tag Wrangler can work around.  But you can easily fix the problem by renaming anything that's in the "wrong" case to the "right" case.  It just means that (as is already the case in Obsidian) you can't have more than one casing of the same tag name displayed in the tag pane, and that now you can easily rename tags to a consistent casing, if desired.

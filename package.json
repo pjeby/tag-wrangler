@@ -1,7 +1,7 @@
 {
   "main": "main.js",
   "name": "tag-wrangler",
-  "version": "0.0.1",
+  "version": "0.2.2",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js"

@@ -20,21 +20,31 @@ export async function renameTag(app, tagName) {
         return new Notice("Unchanged or empty tag: No changes made.");
     }
 
-    const clash = tagClashes(app, "#"+tagName, "#"+newName);
+    const [origin, clash] = tagClashes(app, "#"+tagName, "#"+newName);
     if (clash) {
-        try { await confirm(
-            "WARNING: No Undo!",
-            `Renaming #${tagName} to #${newName} will merge some tags
-into existing tags (such as ${clash}).
+        try {
+            await confirm(
+                "WARNING: No Undo!",
+                `Renaming <code>#${tagName}</code> to <code>#${newName}</code> will merge ${
+                    (origin.toLowerCase() === "#"+tagName.toLowerCase()) ?
+                        `these tags` : `multiple tags
+                        into existing tags (such as <code>${origin}</code>
+                        merging with <code>${clash}</code>)`
+                }.
 
-This <b>cannot</b> be undone.  Do you wish to proceed?`); }
-        catch(e) { return; }
+                This <b>cannot</b> be undone.  Do you wish to proceed?`
+            );
+        } catch(e) {
+            return;
+        }
     }
 
     const filesToRename = await tagPositions(app, "#"+tagName);
     if (!filesToRename) return;
 
     const progress = new Progress(`Renaming to ${newName}/*`, "Processing files...");
+    const replaceTags = tagReplacer(tagName, newName);
+
     let updated = 0;
     await progress.forEach(filesToRename, async (f) => {
         progress.message = "Processing " + f.filename.split("/").pop();
@@ -63,10 +73,10 @@ This <b>cannot</b> be undone.  Do you wish to proceed?`); }
                     if (!field || !field.length) continue;
                     if (typeof field === "string") {
                         const parts = field.split(/(\s*,\s*|^\s+|\s+$)/);
-                        const after = replaceTags(parts, tagName, newName, true).join("");
+                        const after = replaceTags(parts, true).join("");
                         if (field != after) { parsed.set(prop, after); changed = true; }
                     } else if (Array.isArray(field)) {
-                        replaceTags(field, tagName, newName).forEach((v,i) => {
+                        replaceTags(field).forEach((v,i) => {
                             if ( field[i] !== v ) node.set(i,v); changed = true;
                         });
                     }
@@ -80,29 +90,39 @@ This <b>cannot</b> be undone.  Do you wish to proceed?`); }
 }
 
 function tagClashes(app, oldTag, newTag) {
-    const prefix = oldTag + "/";
-    const tags = new Set(Object.keys(app.metadataCache.getTags()));
+    // Renaming to change case doesn't lose info, so ignore it
+    if (oldTag.toLowerCase() === newTag.toLowerCase()) return [];
+
+    const tagMatches = tagMatcher(oldTag);
+    const tags = Object.keys(app.metadataCache.getTags()).reverse();
+    const clashes = new Set(tags.map(s => s.toLowerCase()));
+
     for (const tag of tags) {
-        if (tag === oldTag || tag.startsWith(prefix)) {
+        if (tagMatches(tag)) {
             const changed = newTag + tag.slice(oldTag.length);
-            if (tags.has(changed))
-                return changed;
+            if (clashes.has(changed.toLowerCase())) return [tag, changed];
         }
+    }
+    return [];
+}
+
+function tagMatcher(tagName) {
+    tagName = tagName.toLowerCase();
+    const prefix = tagName + "/";
+    return function (tag) {
+        tag = tag.toLowerCase()
+        return tag == tagName || tag.startsWith(prefix);
     }
 }
 
 async function tagPositions(app, tagName) {
-    const prefix = tagName + "/", result = [];
-    function tagMatches(tag) {
-        return tag == tagName || tag.startsWith(prefix);
-    }
-
-    const progress = new Progress(`Searching for ${prefix}*`, "Matching files...");
+    const tagMatches = tagMatcher(tagName), result = [];
+    const progress = new Progress(`Searching for ${tagName}/*`, "Matching files...");
     await progress.forEach(
         app.metadataCache.getCachedFiles(),
         n => {
             let { frontmatter, tags } = app.metadataCache.getCache(n);
-            tags = tags && tags.filter(t => tagMatches(t.tag || "")).reverse() || []; // last positions first
+            tags = (tags || []).filter(t => t.tag && tagMatches(t.tag)).reverse(); // last positions first
             tags.filename = n;
             tags.fmtags = (parseFrontMatterTags(frontmatter) || []).filter(tagMatches);
             tags.frontmatter = frontmatter;
@@ -114,14 +134,18 @@ async function tagPositions(app, tagName) {
         return result;
 }
 
-function replaceTags(tags, tagName, newName, skipOdd) {
+function tagReplacer(tagName, newName) {
+    tagName = tagName.toLowerCase();
     const tagPath = tagName+"/", hashTag = "#"+tagName, hashPath = "#"+tagPath;
-    return tags.map((t,i) => {
-        if (skipOdd && (i & 1)) return t;  // leave odd entries alone
-        if (t === tagName) return newName;
-        if (t === hashTag) return "#" + newName;
-        if (t.startsWith(tagPath)) return newName+t.slice(tagName.length);
-        if (t.startsWith(hashPath)) return newName+t.slice(hashTag.length);
-        return t;
-    })
+    return function(tags, skipOdd) {
+        return tags.map((t,i) => {
+            const lc = t.toLowerCase();
+            if (skipOdd && (i & 1)) return t;  // leave odd entries alone
+            if (lc === tagName) return newName;
+            if (lc === hashTag) return "#" + newName;
+            if (lc.startsWith(tagPath)) return newName+t.slice(tagName.length);
+            if (lc.startsWith(hashPath)) return newName+t.slice(hashTag.length);
+            return t;
+        });
+    }
 }
