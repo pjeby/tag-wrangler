@@ -51,7 +51,7 @@ Obsidian allows tags to be specified as part of a note's YAML front matter.  Tag
 
 Tag Wrangler uses the same case-insensitive comparison as Obsidian when matching tags to change, and checking for clashes.  Please note, however, that because Obsidian uses the *first* occurrence of a tag to determine how it is displayed in the tag pane, renaming tags without consistent upper/lowercase usage may result in *apparent* changes to the names of "other" tags in the tag pane.
 
-Let's say you have a tag named `#foo/bar`" and you rename `#foo` to `#Bar/baz`.  But in the meantime, you already *had* a tag called `#bar/bell`.  This *might* cause you to now see that tag displayed in the tag pane as `#Bar/bell`, even though Tag Wrangler did not actually replace any existing `#bar/bell` tags in your text!  (As you will see if you search for them.)
+Let's say you have a tag named `#foo/bar` and you rename `#foo` to `#Bar/baz`.  But in the meantime, you already *had* a tag called `#bar/bell`.  This *might* cause you to now see that tag displayed in the tag pane as `#Bar/bell`, even though Tag Wrangler did not actually replace any existing `#bar/bell` tags in your text!  (As you will see if you search for them.)
 
 Rather, this kind of thing will happen if the `#Bar/baz` tag is the first tag beginning with some variant of `bar` that Obsidian encounters when generating the tag pane.  Obsidian just uses the first-encountered string of a particular case as the "display name" for the tag, and then counts all subsequent occurrences as the same tag.
 
