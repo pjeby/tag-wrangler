@@ -2,6 +2,8 @@
 
 This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.md) tag pane, with the following actions available:
 
+![Image of tag wrangler's context menu](contextmenu.png)
+
 * [Rename the tag](#renaming-tags) (and all its subtags)
 * Start a new search for the tag (similar to a plain click)
 * Add the tag as a requirement (`tag:#whatever`) to the current search
@@ -18,6 +20,8 @@ Depending on the current state of the search and tag panes, some actions may not
 ## Installation
 
 Search for "tag wrangler" in Obsidian's Community Plugins interface, or if it's not there yet, just visit the [Github releases page](https://github.com/pjeby/tag-wrangler/releases), download the plugin .zip from the latest release, and unzip it in your vault's `.obsidian/plugins/` directory.  You can then enable it from the Obsidian "Community Plugins" tab for that vault.
+
+Also, make sure that you have enabled the "Tag Pane" plugin, in the "Core Plugins" section of your vault's configuration.  This plugin adds a context menu to the pane provided by that plugin, and does not have any UI of its own.
 
 
 
