@@ -2,7 +2,7 @@
 
 This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.md) tag pane, with the following actions available:
 
-![Image of tag wrangler's context menu](contextmenu.png)
+![Image of tag wrangler's context menu](https://raw.githubusercontent.com/pjeby/tag-wrangler/master/contextmenu.png)
 
 * [Rename the tag](#renaming-tags) (and all its subtags)
 * Start a new search for the tag (similar to a plain click)
