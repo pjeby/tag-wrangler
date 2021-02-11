@@ -2197,7 +2197,7 @@ fsevents@~2.1.2:
 
 "obsidian-rollup-presets@github:pjeby/obsidian-rollup-presets":
   version: 0.1.0
-  resolution: "obsidian-rollup-presets@https://github.com/pjeby/obsidian-rollup-presets.git#commit=0da0645c4c6eab44aaf5e4ea11d1695ee80e5823"
+  resolution: "obsidian-rollup-presets@https://github.com/pjeby/obsidian-rollup-presets.git#commit=154ebe408bb0d64c48e464591bc5db989a4ad6ef"
   dependencies:
     "@rollup/plugin-commonjs": ^17.1.0
     "@rollup/plugin-node-resolve": ^11.1.1
@@ -2210,7 +2210,7 @@ fsevents@~2.1.2:
   peerDependenciesMeta:
     node-sass:
       optional: true
-  checksum: a2ea122793678a2f66465c3aa80e6f81620d3fafdacb183f28d15ec2bd5e305ace9f72755916098de4f58fd9af99624ce92131ed03338d9fd4fcd7ee6dc99cd8
+  checksum: 2d5268765b8d55171364f8abe32920b8a9a8a1a68f13fa2c7cfcffece94888c1687ee51de8ba9af43ffdadb2365416dafd4cea19cb6b9fac179f7af32b45f6bc
   languageName: node
   linkType: hard
 
