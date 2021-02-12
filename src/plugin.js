@@ -16,8 +16,7 @@ export default class TagWrangler extends Plugin {
     onMenu(e, tagEl) {
         const
             tagName = tagEl.find(".tag-pane-tag-text").textContent,
-            treeParent = tagEl.parentElement.parentElement,
-            isHierarchy = treeParent.find(".collapse-icon"),
+            isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon"),
             searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
             search = searchPlugin && searchPlugin.instance,
             query = search && search.getGlobalSearchQuery(),
@@ -38,14 +37,13 @@ export default class TagWrangler extends Plugin {
         }
 
         if (isHierarchy) {
+            const
+                tagParent = tagName.split("/").slice(0, -1).join("/"),
+                tagView = this.leafView(tagEl.matchParent(".workspace-leaf")),
+                tagContainer = tagParent ? tagView.tagDoms[tagParent]: tagView.root
+            ;
             function toggle(collapse) {
-                for(const el of treeParent.children) {
-                    if (!el.hasClass("tree-item")) continue;
-                    if (collapse !== el.hasClass("is-collapsed")) {
-                        const button = el.find(".collapse-icon");
-                        if (button) button.click();
-                    }
-                }
+                for(const tag of tagContainer.children) tag.setCollapsed(collapse);
             }
             menu.addSeparator()
             .addItem(item("vertical-three-dots", "Collapse tags at this level", () => toggle(true )))
@@ -54,6 +52,15 @@ export default class TagWrangler extends Plugin {
 
         menu.showAtPosition({x: e.pageX, y: e.pageY});
     }
+
+    leafView(containerEl) {
+        let view;
+        this.app.workspace.iterateAllLeaves((leaf) => {
+            if (leaf.containerEl === containerEl) { view = leaf.view; return true; }
+        })
+        return view;
+    }
+
 
     async rename(tagName) {
         try { await renameTag(this.app, tagName); }
