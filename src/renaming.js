@@ -66,7 +66,7 @@ export async function renameTag(app, tagName) {
         }
 
         if (f.fmtags) {
-            const [empty, original] = text.split(/---\r?\n/, 2);
+            const [empty, original] = text.split(/^---\r?$\n?/m, 2);
             if (empty === "" && original.trim() !== "" && original.endsWith("\n")) {
                 const parsed = parseDocument(original);
                 let changed = false;
