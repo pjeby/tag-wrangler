@@ -40,7 +40,7 @@ export default class TagWrangler extends Plugin {
             const
                 tagParent = tagName.split("/").slice(0, -1).join("/"),
                 tagView = this.leafView(tagEl.matchParent(".workspace-leaf")),
-                tagContainer = tagParent ? tagView.tagDoms[tagParent]: tagView.root
+                tagContainer = tagParent ? tagView.tagDoms["#" + tagParent.toLowerCase()]: tagView.root
             ;
             function toggle(collapse) {
                 for(const tag of tagContainer.children) tag.setCollapsed(collapse);
