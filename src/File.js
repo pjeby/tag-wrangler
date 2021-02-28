@@ -54,7 +54,8 @@ export class File {
         }
 
         let changed = false;
-        for (const prop of ["tag", "tags"]) {
+        for (const {key: {value:prop}} of parsed.contents.items) {
+            if (!/^tags?$/i.test(prop)) continue;
             const node = parsed.get(prop, true);
             if (!node) continue;
             const field = node.toJSON();
