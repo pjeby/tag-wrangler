@@ -4,7 +4,10 @@ export class Progress {
 
     constructor(title, message) {
         this.progress = progress(title, message);
-        this.progress.catch(() => this.aborted = true);
+        this.progress.catch(e => {
+            this.aborted = true;
+            if (e && (e.constructor !== Error || e.message !== "")) console.error(e);
+        });
         this.dialog = this.progress.dialog;
         this.aborted = false;
     }
