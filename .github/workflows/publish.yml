@@ -23,7 +23,7 @@ jobs:
           TAG_NAME=${GITHUB_REF##*/}
           MANIFEST_VERSION=$(jq -r .version manifest.json)
 
-          if [[ "$MANIFEST_VESION" != "$TAG_NAME" ]]; then
+          if [[ "$MANIFEST_VERSION" != "$TAG_NAME" ]]; then
             echo "ERROR: Commit is tagged '$TAG_NAME' but manifest version is '$MANIFEST_VERSION'"
             exit 1
           fi
