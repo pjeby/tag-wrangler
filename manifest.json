@@ -3,6 +3,6 @@
   "name": "Tag Wrangler",
   "version": "0.3.1",
   "minAppVersion": "0.10.13",
-  "description": "Rename, delete, toggle, and search tags from the tag pane",
+  "description": "Rename, merge, toggle, and search tags from the tag pane",
   "isDesktopOnly": true
 }
