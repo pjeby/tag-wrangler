@@ -43,7 +43,7 @@ function allTags(app) {
     return Object.keys(app.metadataCache.getTags());
 }
 
-async function findTargets(app, tag) {
+export async function findTargets(app, tag) {
     const targets = [];
     const progress = new Progress(`Searching for ${tag}/*`, "Matching files...");
     await progress.forEach(

@@ -1,5 +1,6 @@
 import {Menu, Notice, Plugin} from "obsidian";
-import {renameTag} from "./renaming";
+import {renameTag, findTargets} from "./renaming";
+import {Tag} from "./Tag";
 
 function onElement(el, event, selector, callback, options) {
     el.on(event, selector, callback, options)
@@ -25,6 +26,7 @@ export default class TagWrangler extends Plugin {
             searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
             search = searchPlugin && searchPlugin.instance,
             query = search && search.getGlobalSearchQuery(),
+            random = this.app.plugins.plugins["smart-random-note"],
             menu = e.obsidian_contextmenu.addItem(item("pencil", "Rename #"+tagName, () => this.rename(tagName)));
 
         menu.register(
@@ -48,6 +50,15 @@ export default class TagWrangler extends Plugin {
             }
             menu.addItem(
                 item("crossed-star" , "Exclude #"+tagName+" from search", () => search.openGlobalSearch(query+" -tag:" + tagName))
+            );
+        }
+
+        if (random) {
+            menu.addSeparator().addItem(
+                item("dice", "Open random note", async () => {
+                    const targets = await findTargets(this.app, new Tag(tagName));
+                    random.openRandomNote(targets.map(f=>f.filename));
+                })
             );
         }
 

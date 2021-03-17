@@ -8,6 +8,7 @@ This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.m
 * Start a new search for the tag (similar to a plain click)
 * Add the tag as a requirement (`tag:#whatever`) to the current search
 * Add an exclusion for the tag (`-tag:#whatever`) to the current search
+* Open a random note with that tag (if you have the [Smart Random Note](https://github.com/erichalldev/obsidian-smart-random-note/) plugin installed and enabled)
 * Collapse all tags at the same level in the tag pane
 * Expand all tags at the same level in the tag pane
 
