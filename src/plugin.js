@@ -14,13 +14,28 @@ export default class TagWrangler extends Plugin {
     }
 
     onMenu(e, tagEl) {
+        if (!e.obsidian_contextmenu) {
+            e.obsidian_contextmenu = new Menu();
+            setImmediate(() => menu.showAtPosition({x: e.pageX, y: e.pageY}));
+        }
+
         const
             tagName = tagEl.find(".tag-pane-tag-text").textContent,
             isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon"),
             searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
             search = searchPlugin && searchPlugin.instance,
             query = search && search.getGlobalSearchQuery(),
-            menu = new TagMenu().addItem(item("pencil", "Rename #"+tagName, () => this.rename(tagName)));
+            menu = e.obsidian_contextmenu.addItem(item("pencil", "Rename #"+tagName, () => this.rename(tagName)));
+
+        menu.register(
+            onElement(document, "keydown", "*", e => {
+                if (e.key==="Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    menu.hide();
+                }
+            }, {capture: true})
+        );
 
         if (search) {
             menu.addSeparator().addItem(
@@ -36,6 +51,8 @@ export default class TagWrangler extends Plugin {
             );
         }
 
+        this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, {search, query, isHierarchy});
+
         if (isHierarchy) {
             const
                 tagParent = tagName.split("/").slice(0, -1).join("/"),
@@ -49,8 +66,6 @@ export default class TagWrangler extends Plugin {
             .addItem(item("vertical-three-dots", "Collapse tags at this level", () => toggle(true )))
             .addItem(item("expand-vertically"  , "Expand tags at this level"  , () => toggle(false)))
         }
-
-        menu.showAtPosition({x: e.pageX, y: e.pageY});
     }
 
     leafView(containerEl) {
@@ -67,21 +82,6 @@ export default class TagWrangler extends Plugin {
         catch (e) { console.error(e); new Notice("error: " + e); }
     }
 
-}
-
-class TagMenu extends Menu {
-    load() {
-        super.load();
-        this.register(
-            onElement(document, "keydown", "*", this.onKeydown.bind(this), {capture: true})
-        );
-    }
-    onKeydown(e) {
-        if (e.key==="Escape") {
-            e.preventDefault();
-            this.hide();
-        }
-    }
 }
 
 function item(icon, title, click) {
