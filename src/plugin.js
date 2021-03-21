@@ -16,7 +16,7 @@ export default class TagWrangler extends Plugin {
 
     onMenu(e, tagEl) {
         if (!e.obsidian_contextmenu) {
-            e.obsidian_contextmenu = new Menu();
+            e.obsidian_contextmenu = new Menu(this.app);
             setImmediate(() => menu.showAtPosition({x: e.pageX, y: e.pageY}));
         }
 
