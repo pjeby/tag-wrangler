@@ -152,4 +152,21 @@ button {
 
 
 .smalltalk input[pattern]:invalid, .smalltalk input[pattern]:invalid:enabled:focus, .smalltalk input[pattern][aria-invalid='true'], .smalltalk input[pattern][aria-invalid='true']:enabled:focus {
-  border-color: red; }
+  border-color: var(--text-error);
+  background-color: var(--background-modifier-error); }
+
+.smalltalk .page, .smalltalk .page header, .smalltalk input, .smalltalk button {
+  color: var(--text-normal);
+  text-shadow: none; }
+
+.smalltalk .page {
+  background: var(--background-primary); }
+
+.smalltalk button[data-name="js-ok"] {
+  background: var(--background-modifier-error); }
+
+.smalltalk button[data-name="js-cancel"] {
+  background: var(--background-secondary-alt); }
+
+.smalltalk button {
+  box-shadow: none; }
