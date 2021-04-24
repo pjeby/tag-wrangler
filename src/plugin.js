@@ -1,4 +1,4 @@
-import {Menu, Notice, Plugin} from "obsidian";
+import {Menu, Notice, Plugin, Scope} from "obsidian";
 import {renameTag, findTargets} from "./renaming";
 import {Tag} from "./Tag";
 
@@ -89,8 +89,11 @@ export default class TagWrangler extends Plugin {
 
 
     async rename(tagName) {
+        const scope = new Scope;
+        this.app.keymap.pushScope(scope);
         try { await renameTag(this.app, tagName); }
         catch (e) { console.error(e); new Notice("error: " + e); }
+        this.app.keymap.popScope(scope);
     }
 
 }
