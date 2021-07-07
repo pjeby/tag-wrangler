@@ -43,7 +43,7 @@ export class File {
         const [empty, frontMatter] = text.split(/^---\r?$\n?/m, 2);
 
         // Check for valid, non-empty, properly terminated front matter
-        if (empty !== "" || !frontMatter.trim() || !frontMatter.endsWith("\n"))
+        if (empty.trim() !== "" || !frontMatter.trim() || !frontMatter.endsWith("\n"))
             return text;
 
         const parsed = parseDocument(frontMatter);

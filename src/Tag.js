@@ -31,8 +31,8 @@ export class Replacement {
         this.inArray = (tags, skipOdd) => {
             return tags.map((t, i) => {
                 if (skipOdd && (i & 1)) return t;   // leave odd entries (separators) alone
-                if (cache[t]) return cache[t];
                 if (!t) return t;
+                if (cache[t]) return cache[t];
                 const lc = t.toLowerCase();
                 if (cache[lc]) {
                     return cache[t] = cache[lc];
