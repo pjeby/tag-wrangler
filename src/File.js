@@ -61,7 +61,7 @@ export class File {
             const field = node.toJSON();
             if (!field || !field.length) continue;
             if (typeof field === "string") {
-                const parts = field.split(/(\s*,\s*|^\s+|\s+$)/);
+                const parts = field.split(/([\s,]+)/);
                 const after = replace.inArray(parts, true).join("");
                 if (field != after) { parsed.set(prop, after); changed = true; }
             } else if (Array.isArray(field)) {
