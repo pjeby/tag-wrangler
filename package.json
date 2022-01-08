@@ -8,10 +8,13 @@
   },
   "license": "ISC",
   "devDependencies": {
+    "monkey-around": "^2.3",
     "node-sass": "^5.0.0",
+    "obsidian": "^0.13.11",
     "obsidian-rollup-presets": "github:pjeby/obsidian-rollup-presets",
     "rollup": "^2.38.1",
     "smalltalk": "^4.0.7",
+    "typescript": "4.4.3",
     "yaml": "next"
   }
 }
