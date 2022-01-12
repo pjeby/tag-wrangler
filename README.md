@@ -48,9 +48,15 @@ If you want to refactor your tag hierarchy, note that you can rename a tag and i
 
 Many possibilities are available for refactoring your tags.  Just be sure to make a backup before you start, keep track of what you're changing, and check on the results before you sync or commit your changes.
 
-### Front Matter
+### Metadata / Front Matter
 
-Obsidian allows tags to be specified as part of a note's YAML front matter.  Tag Wrangler will attempt to rename these as well as those found in a note's body.  However, due to limitations of the parser involved, some whitespace in the front matter may be removed or reduced.  In particular, runs of more than one blank line between values are reduced to single blank lines, and spaces between a value and a comment may be similarly reduced in number.  (Most other formatting should remain intact, however, and whitespace that is part of a YAML value will be unaffected.)
+Obsidian allows tags to be specified as part of a note's metadata via YAML front matter.  Tag Wrangler will attempt to rename these as well as those found in a note's body.  However, due to limitations of the parser involved, [**your YAML may be reformatted to some extent**](https://github.com/pjeby/tag-wrangler/issues/26).  Its meaning will be preserved, but blank lines, indentation, and some incidental whitespace may not be.  Empty fields may be converted to explicit nulls, and [YAML aliasing may not be preserved for changed items](https://github.com/pjeby/tag-wrangler/issues/13#issuecomment-826264213).
+
+Comments should be retained, but their original position may not (i.e., changes of indentation, being placed on a new line where before they were on the same line as an item).
+
+To the best of my knowledge, there are currently **no** YAML libraries available that can make automated changes to a YAML file without altering the formatting (or worse, meaning) of that file, that also support all the features of the YAML language.  If this ever changes (for Javascript or Typescript), I'll be happy to switch Tag Wrangler to use that library instead.
+
+There is some small possibility that the existing library could be extended to do more minimal editing, or Tag Wrangler changed to do more surgical editing, but it could easily be a multi-weekend project.  If you are interested in funding such an effort (or doing some of the work yourself), feel free to contact me.
 
 ### Case Insensitivity
 
