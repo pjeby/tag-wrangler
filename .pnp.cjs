@@ -42,7 +42,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["rollup", "npm:2.38.1"],
             ["smalltalk", "npm:4.0.7"],
             ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"],
-            ["yaml", "npm:2.0.0-3"]
+            ["yaml", "npm:2.0.0-10"]
           ],
           "linkType": "SOFT",
         }]
@@ -4141,7 +4141,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["rollup", "npm:2.38.1"],
             ["smalltalk", "npm:4.0.7"],
             ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"],
-            ["yaml", "npm:2.0.0-3"]
+            ["yaml", "npm:2.0.0-10"]
           ],
           "linkType": "SOFT",
         }]
@@ -4431,10 +4431,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],
           "linkType": "HARD",
         }],
-        ["npm:2.0.0-3", {
-          "packageLocation": "./.yarn/cache/yaml-npm-2.0.0-3-31768e827d-e9d3104ff3.zip/node_modules/yaml/",
+        ["npm:2.0.0-10", {
+          "packageLocation": "./.yarn/cache/yaml-npm-2.0.0-10-334367b768-7a0bac2f80.zip/node_modules/yaml/",
           "packageDependencies": [
-            ["yaml", "npm:2.0.0-3"]
+            ["yaml", "npm:2.0.0-10"]
           ],
           "linkType": "HARD",
         }]

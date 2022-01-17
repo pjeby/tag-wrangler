@@ -1,5 +1,5 @@
 import { Notice } from "obsidian";
-import { parseDocument } from "yaml";
+import { CST, parseDocument } from "yaml";
 import { Replacement } from "./Tag";
 
 export class File {
@@ -46,31 +46,37 @@ export class File {
         if (empty.trim() !== "" || !frontMatter.trim() || !frontMatter.endsWith("\n"))
             return text;
 
-        const parsed = parseDocument(frontMatter);
+        const parsed = parseDocument(frontMatter, {keepSourceTokens: true});
         if (parsed.errors.length) {
             const error = `YAML issue with ${this.filename}: ${parsed.errors[0]}`;
             console.error(error); new Notice(error + "; skipping frontmatter");
             return;
         }
 
-        let changed = false;
+        let changed = false, json = parsed.toJSON();
+
+        function setInNode(node, value, afterKey=false) {
+            CST.setScalarValue(node.srcToken, value, {afterKey});
+            changed = true;
+            node.value = value;
+        }
+
         for (const {key: {value:prop}} of parsed.contents.items) {
             if (!/^tags?$/i.test(prop)) continue;
             const node = parsed.get(prop, true);
             if (!node) continue;
-            const field = node.toJSON();
+            const field = json[prop];
             if (!field || !field.length) continue;
             if (typeof field === "string") {
                 const parts = field.split(/([\s,]+)/);
                 const after = replace.inArray(parts, true).join("");
-                if (field != after) { parsed.set(prop, after); changed = true; }
+                if (field != after) setInNode(node, after, true);
             } else if (Array.isArray(field)) {
                 replace.inArray(field).forEach((v, i) => {
-                    if (field[i] !== v)
-                        node.set(i, v); changed = true;
+                    if (field[i] !== v) setInNode(node.get(i, true), v)
                 });
             }
         }
-        return changed ? text.replace(frontMatter, parsed.toString()) : text;
+        return changed ? text.replace(frontMatter, CST.stringify(parsed.contents.srcToken)) : text;
     }
 }

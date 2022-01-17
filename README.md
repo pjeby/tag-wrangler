@@ -50,13 +50,13 @@ Many possibilities are available for refactoring your tags.  Just be sure to mak
 
 ### Metadata / Front Matter
 
-Obsidian allows tags to be specified as part of a note's metadata via YAML front matter.  Tag Wrangler will attempt to rename these as well as those found in a note's body.  However, due to limitations of the parser involved, [**your YAML may be reformatted to some extent**](https://github.com/pjeby/tag-wrangler/issues/26).  Its meaning will be preserved, but blank lines, indentation, and some incidental whitespace may not be.  Empty fields may be converted to explicit nulls, and [YAML aliasing may not be preserved for changed items](https://github.com/pjeby/tag-wrangler/issues/13#issuecomment-826264213).
+Obsidian allows tags to be specified as part of a note's metadata via YAML front matter.  Tag Wrangler will attempt to rename these as well as those found in a note's body.
 
-Comments should be retained, but their original position may not (i.e., changes of indentation, being placed on a new line where before they were on the same line as an item).
+In most cases, this will not cause any issues.  However, you are using advanced YAML features to specify your tags (YAML aliases or block scalars), there are two points you should be aware of.
 
-To the best of my knowledge, there are currently **no** YAML libraries available that can make automated changes to a YAML file without altering the formatting (or worse, meaning) of that file, that also support all the features of the YAML language.  If this ever changes (for Javascript or Typescript), I'll be happy to switch Tag Wrangler to use that library instead.
+First, if you are using YAML block scalars  (`<` or `|`) to specify your tags, a renamed tag [may affect the indentation, spacing, or wrapping](https://github.com/eemeli/yaml/issues/349)  of the tags field.  Second, if you are using YAML aliases (`*`) in your tag list, renaming an aliased tag will [expand the alias in place, rather than changing the anchor that defined it](https://github.com/pjeby/tag-wrangler/issues/13#issuecomment-826264213).
 
-There is some small possibility that the existing library could be extended to do more minimal editing, or Tag Wrangler changed to do more surgical editing, but it could easily be a multi-weekend project.  If you are interested in funding such an effort (or doing some of the work yourself), feel free to contact me.
+The indentation issue has been reported to the upstream library, and hopefully there will be some sort of solution in the future.  For aliases, the current behavior is a deliberate choice to avoid changing non-tag values in your metadata.  So if you are using either of these more-advanced YAML features, you should probably experiment with some fake tags in a scratch note before doing any vault-wide renames.
 
 ### Case Insensitivity
 

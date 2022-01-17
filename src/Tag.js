@@ -32,8 +32,8 @@ export class Replacement {
             return tags.map((t, i) => {
                 if (skipOdd && (i & 1)) return t;   // leave odd entries (separators) alone
                 // Obsidian allows spaces as separators within array elements
-                if (t.contains(" ")) return this.inArray(t.split(/( +)/), true).join("");
                 if (!t) return t;
+                if (/[ ,\n]/.test(t)) return this.inArray(t.split(/([, \n]+)/), true).join("");
                 if (cache[t]) return cache[t];
                 const lc = t.toLowerCase();
                 if (cache[lc]) {

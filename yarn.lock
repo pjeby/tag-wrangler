@@ -3566,7 +3566,7 @@ fsevents@~2.1.2:
     rollup: ^2.38.1
     smalltalk: ^4.0.7
     typescript: 4.4.3
-    yaml: next
+    yaml: 2.0.0-10
   languageName: unknown
   linkType: soft
 
@@ -3819,17 +3819,17 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"yaml@npm:2.0.0-10":
+  version: 2.0.0-10
+  resolution: "yaml@npm:2.0.0-10"
+  checksum: 7a0bac2f80225da6008fb8ab887f43166fb2485cc3e1350185c43499c76841ea0ca9d79b40c0970e08ab3943f25ffb184e709fef7fb8b26d73987ed0452a91cc
+  languageName: node
+  linkType: hard
+
 "yaml@npm:^1.10.0":
   version: 1.10.0
   resolution: "yaml@npm:1.10.0"
   checksum: ae81d29a82d70a9dcf6f7fa8d9e0898f2148570521acb60c1ac9bdafff298dfc86b591a0983f6cc4f9fb11fb420df4c786919060dfd970d2533de20748ccbb28
-  languageName: node
-  linkType: hard
-
-"yaml@npm:next":
-  version: 2.0.0-3
-  resolution: "yaml@npm:2.0.0-3"
-  checksum: e9d3104ff30cca1220b13bd88daf0b7b91c524abb850383daf338400427b8948e5fd63f497f59d395f803fe8ddc8b0889a01b6684772ad8f733cf0630f58594c
   languageName: node
   linkType: hard
 
