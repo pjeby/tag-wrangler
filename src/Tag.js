@@ -1,17 +1,29 @@
+const tagBody = /^#[^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~\[\]\\\s]+$/;
+
 export class Tag {
     constructor(name) {
-        while (name.startsWith("#")) name = name.slice(1);
-        this.name = name;
         const
-            hashed = this.tag = "#" + name,
+            hashed = this.tag = Tag.toTag(name),
             canonical = this.canonical = hashed.toLowerCase(),
             canonical_prefix = this.canonical_prefix = canonical + "/";
+        this.name = hashed.slice(1);
         this.matches = function (text) {
             text = text.toLowerCase();
             return text == canonical || text.startsWith(canonical_prefix);
         };
     }
     toString() { return this.tag; }
+
+    static isTag(s) { return tagBody.test(s); }
+
+    static toTag(name) {
+        while (name.startsWith("##")) name = name.slice(1);
+        return name.startsWith("#") ? name : "#"+name;
+    }
+
+    static canonical(name) {
+        return Tag.toTag(name).toLowerCase();
+    }
 }
 
 export class Replacement {
@@ -28,12 +40,17 @@ export class Replacement {
             return text.slice(0, pos) + toTag.tag + text.slice(pos + fromTag.tag.length);
         }
 
-        this.inArray = (tags, skipOdd) => {
+        this.inArray = (tags, skipOdd, isAlias) => {
             return tags.map((t, i) => {
                 if (skipOdd && (i & 1)) return t;   // leave odd entries (separators) alone
                 // Obsidian allows spaces as separators within array elements
                 if (!t) return t;
-                if (/[ ,\n]/.test(t)) return this.inArray(t.split(/([, \n]+)/), true).join("");
+                // Skip non-tag parts
+                if (isAlias) {
+                    if (!t.startsWith("#") || !Tag.isTag(t)) return t;
+                } else if (/[ ,\n]/.test(t)) {
+                    return this.inArray(t.split(/([, \n]+)/), true).join("");
+                }
                 if (cache[t]) return cache[t];
                 const lc = t.toLowerCase();
                 if (cache[lc]) {

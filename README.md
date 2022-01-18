@@ -4,6 +4,7 @@ This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.m
 
 ![Image of tag wrangler's context menu](https://raw.githubusercontent.com/pjeby/tag-wrangler/master/contextmenu.png)
 
+* Open or create a [Tag Page](#tag-pages) (**NEW in 0.5.0**)
 * [Rename the tag](#renaming-tags) (and all its subtags)
 * Start a new search for the tag (similar to a plain click)
 * Add the tag as a requirement (`tag:#whatever`) to the current search
@@ -20,9 +21,57 @@ Depending on the current state of the search and tag panes, some actions may not
 
 ## Installation
 
-Search for "tag wrangler" in Obsidian's Community Plugins interface, or if it's not there yet, just visit the [Github releases page](https://github.com/pjeby/tag-wrangler/releases), download the plugin .zip from the latest release, and unzip it in your vault's `.obsidian/plugins/` directory.  You can then enable it from the Obsidian "Community Plugins" tab for that vault.
+Search for "tag wrangler" in Obsidian's Community Plugins interface, or [click here](https://obsidian-plugins.peak-dev.org/show/tag-wrangler) to open it in your most-recently-used vault.  (Then select "Install" and "Enable".)
 
 Also, make sure that you have enabled the "Tag Pane" plugin, in the "Core Plugins" section of your vault's configuration.  This plugin adds a context menu to the pane provided by that plugin, and does not have any UI of its own.
+
+
+
+## Tag Pages
+
+People often debate the merits of using tags vs. page links to organize your notes.  With tag pages, you can combine the best of both worlds: the visibility and fluid entry of tags, plus the centralized content and outbound linking of a page.
+
+To create a tag page, just right click any tag in the tag pane, then select "Create Tag Page".  A new note will be created with an alias of the selected tag.  You can rename the note or move it anywhere you like in the vault, as long as it retains the alias linking it to the tag.  (Renaming a tag associated with a tag page (see "Renaming Tags", below) will automatically update the alias.)
+
+To open an *existing* tag page, you can Alt-click any tag in the tag pane or any note, whether in editing or reading view.  Ctrl/Cmd-click or middle click will open the tag page in a new pane.  (Note: if no tag page exists, the normal click behavior of globally searching for the tag will apply.)
+
+Or, you can enter the tag's name in the Obsidian "quick switcher" (default hotkey: Ctrl/Cmd-O) to open the page from the keyboard.  You can also hover-preview any tag in the tag pane or any markdown views to pop up a preview of the tag page.
+
+(If you're not familiar with hover-previewing, the basic idea is that by holding the Ctrl/Cmd key while moving the mouse pointer over an item in Obsidian, a popup will often appear with a small version of the relevant page.  You can also go into the settings for the built-in "Page Preview" plugin and selectively disable the need for using the Ctrl/Cmd key, if you prefer to just hover without it.  Tag Wrangler respects your existing settings for hovering links in Editor and Preview views, and adds an extra setting for "Tag Pane" that controls whether it will require the Ctrl/Cmd key when hovering tags in the tag pane.)
+
+Tag Wrangler does not (yet) support automatic conversion of tag references to page links or vice versa, though it may in a future version.  In the meantime, however, you can use Obsidian's backlinks to find and change such references from the tag page.  Specifically, viewing a tag page's "unlinked mentions" will show you all the locations where the tag was used and "link" buttons you can use to convert them to page links.  (Converting page links to tags requires hand editing.)
+
+
+
+### Manually Creating and Managing Tag Pages
+
+You do not have to use the "Create Tag Page" menu command to create a tag page: any page (even Kanban boards or Excalidraw drawings!) can be a tag page as long as it has a tag as **a valid Obsidian alias**.  You can validate whether a particular page has a valid alias in one of two ways:
+
+- Open the Obsidian Quick Switcher (Ctrl/Cmd-O by default) and type `#` followed by the tag name: the page should show up with the tag as an alias
+- Switch the note to preview, and see if the "Aliases" in the metadata box at the top of the note has a shape containing the tag (with an arrow and a `#` at the front)
+
+If it does not show up in either of the above places, it's likely that your note's metadata is syntactically incorrect in some way.  Obsidian recognizes the first field named `Alias` or `Aliases` (case-insensitive) and expects it to be either a YAML list of strings or a single string of aliases separated by commas.  To be recognized as a tag alias, the string or strings *must* be quoted.  Here are some valid examples of an alias or aliases field that contains a tag, each of which would cause the note to be considered the tag page for `#some/tag`:
+
+```yaml
+---
+Alias: "#some/tag"
+---
+Aliases: [ "#some/tag", "another alias" ]
+---
+alias:
+  - some alias
+  - "#some/tag"
+  - another alias
+---
+aliases: "some alias, #some/tag, another alias"
+---
+```
+
+Notice that either each item must be quoted and be in a valid YAML list (`[ ]` or lines with `-`), or else the *entire* alias collection should be quoted and comma-separated.  A tag alias must also not contain any whitespace or other text.
+
+When a tag is renamed, Tag Wrangler will automatically update the alias.  You can also manually edit or remove the aliases to disconnect a tag page, add additional tags (in case you want more than one tag sharing the same page), or change what tag the page is for.
+
+Finally, note that nothing prevents you from adding the same alias to more than one note, but in such a case Tag Wrangler will select the tag page at random from the available options.  To fix this, use the quick switcher to search for notes with that alias (i.e., by typing `#` and the tag name), then remove the alias(es) from the note(s) you don't want to use as tag pages.
 
 
 

@@ -1,6 +1,9 @@
-import {Menu, Notice, Plugin, Scope} from "obsidian";
+import {Component, Keymap, Menu, Notice, parseFrontMatterAliases, Plugin, Scope} from "obsidian";
 import {renameTag, findTargets} from "./renaming";
 import {Tag} from "./Tag";
+import {around} from "monkey-around";
+
+const tagHoverMain = "tag-wrangler:tag-pane";
 
 function onElement(el, event, selector, callback, options) {
     el.on(event, selector, callback, options)
@@ -8,10 +11,131 @@ function onElement(el, event, selector, callback, options) {
 }
 
 export default class TagWrangler extends Plugin {
-    onload(){
+    pageAliases = new Map();
+    tagPages = new Map();
+
+    tagPage(tag) {
+        return Array.from(this.tagPages.get(Tag.canonical(tag)) || "")[0]
+    }
+
+    openTagPage(file, isNew, newLeaf) {
+        const openState = { state: {mode: "source"}};
+        if (isNew) openState.eState = {rename: "all"};
+        return this.app.workspace.getLeaf(newLeaf).openFile(file, openState);
+    }
+
+    async createTagPage(tagName, newLeaf) {
+        const baseName = new Tag(tagName).name.split("/").join(" ");
+        const folder = this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path || "");
+        const path = this.app.vault.getAvailablePath(folder.getParentPrefix()+baseName, "md");
+        this.openTagPage(await this.app.vault.create(path, [
+            "---",
+            `Aliases: [ ${JSON.stringify(Tag.toTag(tagName))} ]`,
+            "---",
+            ""
+        ].join("\n")), true, newLeaf);
+    }
+
+    async onload(){
         this.register(
             onElement(document, "contextmenu", ".tag-pane-tag", this.onMenu.bind(this), {capture: true})
         );
+
+        this.app.workspace.registerHoverLinkSource(tagHoverMain, {display: 'Tag pane', defaultMod: true});
+
+        this.addChild(
+            // Tags in the tag pane
+            new TagPageUIHandler(this, {
+                hoverSource: tagHoverMain, selector: ".tag-pane-tag", container: ".tag-container",
+                toTag(el) { return el.find(".tag-pane-tag-text")?.textContent; }
+            })
+        );
+
+        this.addChild(
+            // Reading mode / tag links
+            new TagPageUIHandler(this, {
+                hoverSource: "preview", selector: 'a.tag[href^="#"]',
+                container: ".markdown-preview-view, .markdown-embed, .workspace-leaf-content",
+                toTag(el) { return el.getAttribute("href"); }
+            })
+        );
+
+        this.addChild(
+            // Edit mode
+            new TagPageUIHandler(this, {
+                hoverSource: "editor", selector: "span.cm-hashtag",
+                container: ".markdown-source-view",
+                toTag(el) {
+                    // Multiple cm-hashtag elements can be side by side: join them all together:
+                    let tagName = el.textContent;
+                    for (let t=el.previousElementSibling; t?.matches("span.cm-hashtag"); t = t.previousElementSibling) {
+                        tagName = t.textContent + tagName;
+                    }
+                    for (let t=el.nextElementSibling; t?.matches("span.cm-hashtag"); t = t.nextElementSibling) {
+                        tagName += t.textContent;
+                    }
+                    return tagName;
+                }
+            })
+        );
+
+        // Track Tag Pages
+        const metaCache = this.app.metadataCache;
+        const plugin = this;
+
+        this.register(around(metaCache, {
+            getTags(old) {
+                return function getTags() {
+                    const tags = old.call(this);
+                    const names = new Set(Object.keys(tags).map(t => t.toLowerCase()));
+                    for (const t of plugin.tagPages.keys()) {
+                        if (!names.has(t)) tags[plugin.tagPages.get(t).tag] = 0;
+                    }
+                    return tags;
+                }
+            }
+        }));
+
+        this.app.workspace.onLayoutReady(() => {
+            metaCache.getCachedFiles().forEach(filename => {
+                const fm = metaCache.getCache(filename)?.frontmatter;
+                if (fm && parseFrontMatterAliases(fm)?.filter(Tag.isTag)) this.updatePage(
+                    this.app.vault.getAbstractFileByPath(filename), fm
+                );
+            });
+            this.registerEvent(metaCache.on("changed", (file, data, cache) => this.updatePage(file, cache?.frontmatter)));
+            this.registerEvent(this.app.vault.on("delete", file => this.updatePage(file)));
+            app.workspace.getLeavesOfType("tag").forEach(leaf => {leaf?.view?.requestUpdateTags?.()});
+        });
+    }
+
+    updatePage(file, frontmatter) {
+        const tags = parseFrontMatterAliases(frontmatter)?.filter(Tag.isTag) || [];
+        if (this.pageAliases.has(file)) {
+            const oldTags = new Set(tags || []);
+            for (const tag of this.pageAliases.get(file)) {
+                if (oldTags.has(tag)) continue;  // don't bother deleting what we'll just put back
+                const key = Tag.canonical(tag);
+                const tp = this.tagPages.get(key);
+                if (tp) {
+                    tp.delete(file);
+                    if (!tp.size) this.tagPages.delete(key);
+                }
+            }
+            if (!tags.length) this.pageAliases.delete(file);
+        }
+        if (tags.length) {
+            this.pageAliases.set(file, tags);
+            for (const tag of tags) {
+                const key = Tag.canonical(tag);
+                if (this.tagPages.has(key)) this.tagPages.get(key).add(file);
+                else {
+                    const tagSet = new Set([file]);
+                    tagSet.tag = Tag.toTag(tag);
+                    this.tagPages.set(key, tagSet);
+                }
+            }
+        }
     }
 
     onMenu(e, tagEl) {
@@ -22,6 +146,7 @@ export default class TagWrangler extends Plugin {
 
         const
             tagName = tagEl.find(".tag-pane-tag-text").textContent,
+            tagPage = this.tagPage(tagName),
             isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon"),
             searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
             search = searchPlugin && searchPlugin.instance,
@@ -38,6 +163,17 @@ export default class TagWrangler extends Plugin {
                 }
             }, {capture: true})
         );
+
+        menu.addSeparator();
+        if (tagPage) {
+            menu.addItem(
+                item("popup-open", "Open tag page", (e) => this.openTagPage(tagPage, false, Keymap.isModEvent(e)))
+            )
+        } else {
+            menu.addItem(
+                item("create-new", "Create tag page", (e) => this.createTagPage(tagName, Keymap.isModEvent(e)))
+            )
+        }
 
         if (search) {
             menu.addSeparator().addItem(
@@ -62,7 +198,7 @@ export default class TagWrangler extends Plugin {
             );
         }
 
-        this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, {search, query, isHierarchy});
+        this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, {search, query, isHierarchy, tagPage});
 
         if (isHierarchy) {
             const
@@ -102,3 +238,41 @@ function item(icon, title, click) {
     return i => i.setIcon(icon).setTitle(title).onClick(click);
 }
 
+
+class TagPageUIHandler extends Component {
+    // Handle hovering and clicks-to-open for tag pages
+
+    constructor(plugin, opts) {
+        super();
+        this.opts = opts
+        this.plugin = plugin;
+    }
+
+    onload() {
+        const {selector, container, hoverSource, toTag} = this.opts;
+        this.register(
+            // Show tag page on hover
+            onElement(document, "mouseover", selector, (event, targetEl) => {
+                const tagName = toTag(targetEl), tp = tagName && this.plugin.tagPage(tagName);
+                if (tp) this.plugin.app.workspace.trigger('hover-link', {
+                    event, source: hoverSource, targetEl, linktext: tp.path,
+                    hoverParent: targetEl.matchParent(container)
+                });
+            }, {capture: false})
+        );
+        this.register(
+            // Open tag page w/alt click (current pane) or ctrl/cmd/middle click (new pane)
+            onElement(document, "click", selector, (event, targetEl) => {
+                const {altKey} = event;
+                if (!Keymap.isModEvent(event) && !altKey) return;
+                const tagName = toTag(targetEl), tp = tagName && this.plugin.tagPage(tagName);
+                if (tp) {
+                    this.plugin.openTagPage(tp, false, !altKey);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                }
+            }, {capture: true})
+        );
+    }
+}

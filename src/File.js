@@ -61,20 +61,27 @@ export class File {
             node.value = value;
         }
 
-        for (const {key: {value:prop}} of parsed.contents.items) {
-            if (!/^tags?$/i.test(prop)) continue;
+        function processField(prop, isAlias) {
             const node = parsed.get(prop, true);
-            if (!node) continue;
+            if (!node) return;
             const field = json[prop];
-            if (!field || !field.length) continue;
+            if (!field || !field.length) return;
             if (typeof field === "string") {
-                const parts = field.split(/([\s,]+)/);
-                const after = replace.inArray(parts, true).join("");
+                const parts = field.split(isAlias ? /(^\s+|\s*,\s*|\s+$)/ : /([\s,]+)/);
+                const after = replace.inArray(parts, true, isAlias).join("");
                 if (field != after) setInNode(node, after, true);
             } else if (Array.isArray(field)) {
-                replace.inArray(field).forEach((v, i) => {
+                replace.inArray(field, false, isAlias).forEach((v, i) => {
                     if (field[i] !== v) setInNode(node.get(i, true), v)
                 });
+            }
+        }
+
+        for (const {key: {value:prop}} of parsed.contents.items) {
+            if (/^tags?$/i.test(prop)) {
+                processField(prop, false);
+            } else if (/^alias(es)?$/i.test(prop)) {
+                processField(prop, true);
             }
         }
         return changed ? text.replace(frontMatter, CST.stringify(parsed.contents.srcToken)) : text;

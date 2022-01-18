@@ -1,7 +1,7 @@
 import {confirm} from "smalltalk";
 import {Progress} from "./progress";
 import {validatedInput} from "./validation";
-import {Notice, parseFrontMatterTags} from "obsidian";
+import {Notice, parseFrontMatterAliases, parseFrontMatterTags} from "obsidian";
 import {Tag, Replacement} from "./Tag";
 import {File} from "./File";
 
@@ -52,8 +52,9 @@ export async function findTargets(app, tag) {
             let { frontmatter, tags } = app.metadataCache.getCache(filename) || {};
             tags = (tags || []).filter(t => t.tag && tag.matches(t.tag)).reverse(); // last positions first
             const fmtags = (parseFrontMatterTags(frontmatter) || []).filter(tag.matches);
-            if (tags.length || fmtags.length)
-                targets.push(new File(app, filename, tags, fmtags.length));
+            const aliasTags = (parseFrontMatterAliases(frontmatter) || []).filter(Tag.isTag).filter(tag.matches);
+            if (tags.length || fmtags.length || aliasTags.length)
+                targets.push(new File(app, filename, tags, fmtags.length + aliasTags.length));
         }
     );
     if (!progress.aborted)
