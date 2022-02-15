@@ -19,8 +19,10 @@ export default class TagWrangler extends Plugin {
     }
 
     openTagPage(file, isNew, newLeaf) {
-        const openState = { state: {mode: "source"}};
-        if (isNew) openState.eState = {rename: "all"};
+        const openState = {
+            eState: isNew ? {rename: "all"} : {focus: true},  // Rename new page, focus existing
+            ...(isNew ? {state: {mode: "source"}} : {})       // and set source mode for new page
+        }
         return this.app.workspace.getLeaf(newLeaf).openFile(file, openState);
     }
 
