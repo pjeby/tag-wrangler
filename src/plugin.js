@@ -195,7 +195,7 @@ export default class TagWrangler extends Plugin {
             menu.addSeparator().addItem(
                 item("dice", "Open random note", async () => {
                     const targets = await findTargets(this.app, new Tag(tagName));
-                    random.openRandomNote(targets.map(f=>f.filename));
+                    random.openRandomNote(targets.map(f=> this.app.vault.getAbstractFileByPath(f.filename)));
                 })
             );
         }
