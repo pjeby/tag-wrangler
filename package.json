@@ -13,7 +13,7 @@
     "obsidian": "^0.13.11",
     "obsidian-rollup-presets": "github:pjeby/obsidian-rollup-presets",
     "rollup": "^2.38.1",
-    "smalltalk": "^4.0.7",
+    "smalltalk": "github:pjeby/smalltalk.git#patch-1",
     "typescript": "4.4.3",
     "yaml": "2.0.0-10"
   },
