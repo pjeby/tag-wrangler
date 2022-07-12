@@ -1,22 +1,15 @@
 {
-  "main": "main.js",
   "name": "tag-wrangler",
-  "version": "0.2.2",
   "scripts": {
-    "dev": "rollup --config rollup.config.js -w",
-    "build": "rollup --config rollup.config.js"
+    "dev": "node ophidian.config.mjs dev",
+    "build": "node ophidian.config.mjs production"
   },
   "license": "ISC",
   "devDependencies": {
     "monkey-around": "^2.3",
-    "node-sass": "^5.0.0",
-    "obsidian": "^0.13.11",
-    "obsidian-rollup-presets": "github:pjeby/obsidian-rollup-presets",
-    "rollup": "^2.38.1",
+    "obsidian": "^0.14.5",
+    "ophidian": "github:pjeby/ophidian",
     "smalltalk": "github:pjeby/smalltalk.git#patch-1",
-    "typescript": "4.4.3",
     "yaml": "2.0.0-10"
-  },
-  "type": "module",
-  "packageManager": "yarn@3.1.1"
+  }
 }
