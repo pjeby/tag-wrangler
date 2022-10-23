@@ -156,16 +156,6 @@ export default class TagWrangler extends Plugin {
             random = this.app.plugins.plugins["smart-random-note"],
             menu = e.obsidian_contextmenu.addItem(item("pencil", "Rename #"+tagName, () => this.rename(tagName)));
 
-        menu.register(
-            onElement(document, "keydown", "*", e => {
-                if (e.key==="Escape") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    menu.hide();
-                }
-            }, {capture: true})
-        );
-
         menu.addSeparator();
         if (tagPage) {
             menu.addItem(
