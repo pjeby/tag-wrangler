@@ -81,6 +81,26 @@ export default class TagWrangler extends Plugin {
             })
         );
 
+
+        // Tag Drag
+        this.register(
+            onElement(document, "pointerdown", ".tag-pane-tag", (_, targetEl) => {
+                targetEl.draggable = "true";
+            }, {capture: true})
+        );
+        this.register(
+            onElement(document, "dragstart", ".tag-pane-tag", (event, targetEl) => {
+                const tagName = targetEl.find(".tag-pane-tag-text")?.textContent;
+                event.dataTransfer.setData("text/plain", "#"+tagName);
+                app.dragManager.onDragStart(event, {
+                    source: "tag-wrangler",
+                    type: "text",
+                    title: tagName,
+                    icon: "hashtag",
+                })
+            }, {capture: false})
+        );
+
         // Track Tag Pages
         const metaCache = this.app.metadataCache;
         const plugin = this;
@@ -143,7 +163,7 @@ export default class TagWrangler extends Plugin {
     onMenu(e, tagEl) {
         if (!e.obsidian_contextmenu) {
             e.obsidian_contextmenu = new Menu(this.app);
-            setImmediate(() => menu.showAtPosition({x: e.pageX, y: e.pageY}));
+            setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
         }
 
         const

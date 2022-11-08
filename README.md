@@ -1,5 +1,7 @@
 # Obsidian Tag Wrangler Plugin
 
+> NEW in 0.5.5 - you can now drag tags from the tag pane to an editor pane to insert them as text.
+
 This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.md) tag pane, with the following actions available:
 
 ![Image of tag wrangler's context menu](https://raw.githubusercontent.com/pjeby/tag-wrangler/master/contextmenu.png)
