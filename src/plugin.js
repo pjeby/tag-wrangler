@@ -70,10 +70,10 @@ export default class TagWrangler extends Plugin {
                 toTag(el) {
                     // Multiple cm-hashtag elements can be side by side: join them all together:
                     let tagName = el.textContent;
-                    for (let t=el.previousElementSibling; t?.matches("span.cm-hashtag"); t = t.previousElementSibling) {
+                    if (!el.matches(".cm-formatting")) for (let t=el.previousElementSibling; t?.matches("span.cm-hashtag:not(.cm-formatting)"); t = t.previousElementSibling) {
                         tagName = t.textContent + tagName;
                     }
-                    for (let t=el.nextElementSibling; t?.matches("span.cm-hashtag"); t = t.nextElementSibling) {
+                    for (let t=el.nextElementSibling; t?.matches("span.cm-hashtag:not(.cm-formatting)"); t = t.nextElementSibling) {
                         tagName += t.textContent;
                     }
                     return tagName;
