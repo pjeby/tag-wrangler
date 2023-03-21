@@ -219,7 +219,7 @@ export default class TagWrangler extends Plugin {
                 tagContainer = tagParent ? tagView.tagDoms["#" + tagParent.toLowerCase()]: tagView.root
             ;
             function toggle(collapse) {
-                for(const tag of tagContainer.children) tag.setCollapsed(collapse);
+                for(const tag of tagContainer.children ?? tagContainer.vChildren.children) tag.setCollapsed(collapse);
             }
             menu.addSeparator()
             .addItem(item("vertical-three-dots", "Collapse tags at this level", () => toggle(true )))
