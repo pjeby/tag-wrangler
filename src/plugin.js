@@ -49,7 +49,7 @@ export default class TagWrangler extends Plugin {
             // Tags in the tag pane
             new TagPageUIHandler(this, {
                 hoverSource: tagHoverMain, selector: ".tag-pane-tag", container: ".tag-container",
-                toTag(el) { return el.find(".tag-pane-tag-text")?.textContent; }
+                toTag(el) { return el.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent; }
             })
         );
 
@@ -90,7 +90,7 @@ export default class TagWrangler extends Plugin {
         );
         this.register(
             onElement(document, "dragstart", ".tag-pane-tag", (event, targetEl) => {
-                const tagName = targetEl.find(".tag-pane-tag-text")?.textContent;
+                const tagName = targetEl.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent;
                 event.dataTransfer.setData("text/plain", "#"+tagName);
                 app.dragManager.onDragStart(event, {
                     source: "tag-wrangler",
@@ -167,7 +167,7 @@ export default class TagWrangler extends Plugin {
         }
 
         const
-            tagName = tagEl.find(".tag-pane-tag-text").textContent,
+            tagName = tagEl.find(".tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text").textContent,
             tagPage = this.tagPage(tagName),
             isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon"),
             searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
