@@ -27,15 +27,23 @@ export default class TagWrangler extends Plugin {
     }
 
     async createTagPage(tagName, newLeaf) {
-        const baseName = new Tag(tagName).name.split("/").join(" ");
-        const folder = this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path || "");
-        const path = this.app.vault.getAvailablePath(folder.getParentPrefix()+baseName, "md");
-        this.openTagPage(await this.app.vault.create(path, [
-            "---",
-            `Aliases: [ ${JSON.stringify(Tag.toTag(tagName))} ]`,
-            "---",
-            ""
-        ].join("\n")), true, newLeaf);
+        const tag = new Tag(tagName);
+        const tp_evt = { tag: tag.canonical, file: undefined };
+        app.workspace.trigger("tag-page:will-create", tp_evt);
+        if (!tp_evt.file) {
+            const baseName = new Tag(tagName).name.split("/").join(" ");
+            const folder = this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path || "");
+            const path = this.app.vault.getAvailablePath(folder.getParentPrefix()+baseName, "md");
+            const file = await this.app.vault.create(path, [
+                "---",
+                `Aliases: [ ${JSON.stringify(Tag.toTag(tagName))} ]`,
+                "---",
+                ""
+            ].join("\n"));
+            tp_evt.file = file;
+        }
+        app.workspace.trigger("tag-page:did-create", tp_evt);
+        this.openTagPage(tp_evt.file, true, newLeaf);
     }
 
     async onload(){
@@ -279,7 +287,7 @@ class TagPageUIHandler extends Component {
                 if (!Keymap.isModEvent(event) && !altKey) return;
                 const tagName = toTag(targetEl), tp = tagName && this.plugin.tagPage(tagName);
                 if (tp) {
-                    this.plugin.openTagPage(tp, false, !altKey);
+                    this.plugin.openTagPage(tp, false, Keymap.isModEvent(event));
                     event.preventDefault();
                     event.stopPropagation();
                     return false;

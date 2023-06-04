@@ -118,3 +118,51 @@ Let's say you have a tag named `#foo/bar` and you rename `#foo` to `#Bar/baz`.  
 Rather, this kind of thing will happen if the `#Bar/baz` tag is the first tag beginning with some variant of `bar` that Obsidian encounters when generating the tag pane.  Obsidian just uses the first-encountered string of a particular case as the "display name" for the tag, and then counts all subsequent occurrences as the same tag.
 
 This is just how Obsidian tags work, and not something that Tag Wrangler can work around.  But you can easily fix the problem by renaming anything that's in the "wrong" case to the "right" case.  It just means that (as is already the case in Obsidian) you can't have more than one casing of the same tag name displayed in the tag pane, and that now you can easily rename tags to a consistent casing, if desired.
+
+
+
+## Developer Notes
+
+Tag Wrangler triggers the following events on the `app.workspace` that may be useful for integration with other plugins:
+
+### `tag-wrangler:contextmenu`
+
+This event allows other plugins to add menu items to the Tag Wrangler context menus.  You can register a callback like this:
+
+```typescript
+type menuInfo = {
+  query?: string           // the current global search query
+  isHierarchy: boolean     // true if the tag is a child tag in the tag pane (sorted by hierarchy)
+  tagPage: TFile|undefined // the tag page for the note, if it exists
+};
+
+this.registerEvent(
+  app.workspace.on("tag-wrangler:contextmenu", (menu: Menu, tagName: string, info: menuInfo) => {
+    // add items to menu here
+  })
+);
+```
+
+### `tag-page:will-create`
+
+This event allows other plugins to take over creation of tag pages.  You can register a callback like so:
+
+```typescript
+type tagPageEvent = {
+  tag: string
+  file?: TFile
+}
+
+this.registerEvent(app.workspace.on("tag-page:will-create", (evt: tagPageEvent) => {
+  if (!evt.file) {
+    // create the file here, then save it in the event
+    evt.file = // the new file to use
+  }
+}));
+```
+
+Note that if `evt.file` exists, your callback should not do anything, as the file has already been created.  If you want to modify an already-created tag page file, use the `tag-page:did-create` event instead.  (See below.)
+
+### `tag-page:did-create`
+
+This event allows other plugins to modify or rename a newly-created tag page.  It has the same callback signature as `tag-page:will-create`, except the `file` field will always contain a file.  (The one created by Tag Wrangler or by a callback to `tag-page:will-create`.)  You should use the `app.vault.process()` method to do any changes, to prevent accidental file overwrites and data loss.  (It should also be safe to `app.vault.rename()` it to change its name or location.)
