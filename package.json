@@ -8,7 +8,8 @@
   "devDependencies": {
     "monkey-around": "^2.3",
     "obsidian": "^0.14.5",
-    "ophidian": "github:pjeby/ophidian",
+    "@ophidian/build": "^1.0.2",
+    "@ophidian/core": "github:ophidian-lib/core",
     "smalltalk": "github:pjeby/smalltalk.git#patch-1",
     "yaml": "2.0.0-10"
   }

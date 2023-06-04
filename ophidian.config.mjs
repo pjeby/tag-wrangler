@@ -1,4 +1,4 @@
-import Builder from "ophidian/build";
+import Builder from "@ophidian/build";
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
