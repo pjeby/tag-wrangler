@@ -1,8 +1,9 @@
-lockfileVersion: 5.3
+lockfileVersion: 5.4
 
 specifiers:
   '@ophidian/build': ^1.0.2
   '@ophidian/core': github:ophidian-lib/core
+  dotenv: ^16.1.3
   monkey-around: ^2.3
   obsidian: ^0.14.5
   smalltalk: github:pjeby/smalltalk.git#patch-1
@@ -11,6 +12,7 @@ specifiers:
 devDependencies:
   '@ophidian/build': 1.0.2
   '@ophidian/core': github.com/ophidian-lib/core/7638db4cded07464dc15acda7f6118f0999f7804
+  dotenv: 16.1.3
   monkey-around: 2.3.0
   obsidian: 0.14.8
   smalltalk: github.com/pjeby/smalltalk/7c3a5ba2c8f6363d050ab23ba95165d7d270a456
@@ -247,6 +249,11 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       path-type: 4.0.0
+    dev: true
+
+  /dotenv/16.1.3:
+    resolution: {integrity: sha512-FYssxsmCTtKL72fGBSvb1K9dRz0/VZeWqFme/vSb7r7323x4CRaHu4LvQ5JG3+s6yt2YPbBrkpiEODktfyjI9A==}
+    engines: {node: '>=12'}
     dev: true
 
   /esbuild-android-64/0.14.49:
