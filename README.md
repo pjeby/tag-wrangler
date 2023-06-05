@@ -150,19 +150,23 @@ This event allows other plugins to take over creation of tag pages.  You can reg
 ```typescript
 type tagPageEvent = {
   tag: string
-  file?: TFile
+  file?: TFile | Promise<TFile>
 }
 
 this.registerEvent(app.workspace.on("tag-page:will-create", (evt: tagPageEvent) => {
   if (!evt.file) {
     // create the file here, then save it in the event
-    evt.file = // the new file to use
+    evt.file = someAsynFunctionReturningaTFilePromise();
   }
 }));
 ```
 
-Note that if `evt.file` exists, your callback should not do anything, as the file has already been created.  If you want to modify an already-created tag page file, use the `tag-page:did-create` event instead.  (See below.)
+You can set the file to the result of calling an async function (as shown), but the event handler itself must **not** be async nor should it await anything.  If it's async, you will most likely end up with multiple files created because Tag Wrangler and any other event handlers for the event will think no other plugin has created one.
+
+Note that if `evt.file` is anything but `undefined`, your callback *must not do anything*, as the file has already been created or is in the process of being created.  If you want to modify an already-created tag page file, use the `tag-page:did-create` event instead.  (See below.)
+
+For users of Quickadd and other plugins that allow user-defined Javascript, note that the `this.registerEvent()` call may need to be replaced with something like `app.plugins.plugins['quickadd'].registerEvent()`.  You should also only run this code *once*, when the plugin is initialized, and not as part of a command or template.
 
 ### `tag-page:did-create`
 
-This event allows other plugins to modify or rename a newly-created tag page.  It has the same callback signature as `tag-page:will-create`, except the `file` field will always contain a file.  (The one created by Tag Wrangler or by a callback to `tag-page:will-create`.)  You should use the `app.vault.process()` method to do any changes, to prevent accidental file overwrites and data loss.  (It should also be safe to `app.vault.rename()` it to change its name or location.)
+This event allows other plugins to modify or rename a newly-created tag page.  It has the same callback signature as `tag-page:will-create`, except the `file` field will always contain a TFile.  (The one created by Tag Wrangler or by a callback to `tag-page:will-create`.)  You should use the `app.vault.process()` method to do any changes, to prevent accidental file overwrites and data loss.  (It should also be safe to `app.vault.rename()` it to change its name or location.)
