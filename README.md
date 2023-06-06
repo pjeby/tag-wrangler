@@ -170,3 +170,5 @@ For users of Quickadd and other plugins that allow user-defined Javascript, note
 ### `tag-page:did-create`
 
 This event allows other plugins to modify or rename a newly-created tag page.  It has the same callback signature as `tag-page:will-create`, except the `file` field will always contain a TFile.  (The one created by Tag Wrangler or by a callback to `tag-page:will-create`.)  You should use the `app.vault.process()` method to do any changes, to prevent accidental file overwrites and data loss.  (It should also be safe to `app.vault.rename()` it to change its name or location.)
+
+Unlike event handlers for `will-create`, the handler for `did-create` can be asynchronous.

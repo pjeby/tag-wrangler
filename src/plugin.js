@@ -43,8 +43,8 @@ export default class TagWrangler extends Plugin {
             ].join("\n"));
         }
         tp_evt.file = file;
+        await this.openTagPage(file, true, newLeaf);
         app.workspace.trigger("tag-page:did-create", tp_evt);
-        this.openTagPage(file, true, newLeaf);
     }
 
     async onload(){
