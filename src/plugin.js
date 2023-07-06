@@ -2,6 +2,8 @@ import {Component, Keymap, Menu, Notice, parseFrontMatterAliases, Plugin, Scope}
 import {renameTag, findTargets} from "./renaming";
 import {Tag} from "./Tag";
 import {around} from "monkey-around";
+import {i18next} from './i18next/locale';
+import { CREATE_A_TAG, enKeys, EXCLUDE, FROM_SEARCH, NEW_SEARCH_FOR, OPEN_TAG_PAGE} from './i18next/locales/en';
 
 const tagHoverMain = "tag-wrangler:tag-pane";
 
@@ -10,9 +12,14 @@ function onElement(el, event, selector, callback, options) {
     return () => el.off(event, selector, callback, options);
 }
 
+
+
 export default class TagWrangler extends Plugin {
     pageAliases = new Map();
     tagPages = new Map();
+    i18nextInstance;
+    it = {}
+    translate = (text) => text;
 
     tagPage(tag) {
         return Array.from(this.tagPages.get(Tag.canonical(tag)) || "")[0]
@@ -51,6 +58,24 @@ export default class TagWrangler extends Plugin {
         this.register(
             onElement(document, "contextmenu", ".tag-pane-tag", this.onMenu.bind(this), {capture: true})
         );
+        try {
+
+            let i18 = await i18next;
+            if (i18) {
+                this.i18nextInstance = i18;
+                this.translate = function(text) {
+                    return i18.t(text);
+                }
+            }
+        } catch(err) {
+            console.log({err})
+        }
+            
+        this.it = enKeys.reduce((chain, itKey) => {
+            chain[itKey] = this.translate(itKey);
+            return chain;
+        },{})
+
 
         this.app.workspace.registerHoverLinkSource(tagHoverMain, {display: 'Tag pane', defaultMod: true});
 
@@ -175,6 +200,7 @@ export default class TagWrangler extends Plugin {
             setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
         }
 
+
         const
             tagName = tagEl.find(".tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text").textContent,
             tagPage = this.tagPage(tagName),
@@ -183,30 +209,31 @@ export default class TagWrangler extends Plugin {
             search = searchPlugin && searchPlugin.instance,
             query = search && search.getGlobalSearchQuery(),
             random = this.app.plugins.plugins["smart-random-note"],
-            menu = e.obsidian_contextmenu.addItem(item("pencil", "Rename #"+tagName, () => this.rename(tagName)));
+            menu = e.obsidian_contextmenu.addItem(item("pencil", `${this.it.Rename} #`+tagName, () => this.rename(tagName)));
 
         menu.addSeparator();
         if (tagPage) {
             menu.addItem(
-                item("popup-open", "Open tag page", (e) => this.openTagPage(tagPage, false, Keymap.isModEvent(e)))
+                item("popup-open", this.it[OPEN_TAG_PAGE], (e) => this.openTagPage(tagPage, false, Keymap.isModEvent(e)))
             )
         } else {
             menu.addItem(
-                item("create-new", "Create tag page", (e) => this.createTagPage(tagName, Keymap.isModEvent(e)))
+                item("create-new",this.it[CREATE_A_TAG], (e) => this.createTagPage(tagName, Keymap.isModEvent(e)))
             )
         }
 
         if (search) {
             menu.addSeparator().addItem(
-                item("magnifying-glass", "New search for #"+tagName, () => search.openGlobalSearch("tag:" + tagName))
+                item("magnifying-glass", `${this.it[NEW_SEARCH_FOR]} #`+tagName, () => search.openGlobalSearch("tag:" + tagName))
             );
             if (query) {
                 menu.addItem(
-                    item("sheets-in-box", "Require #"+tagName+" in search"  , () => search.openGlobalSearch(query+" tag:"  + tagName))
+                    item("sheets-in-box", `${this.it[REQUIRE]} #${tagName} ${this.it[IN_SEARCH]}`, 
+                    () => search.openGlobalSearch(query+" tag:"  + tagName))
                 );
             }
             menu.addItem(
-                item("crossed-star" , "Exclude #"+tagName+" from search", () => search.openGlobalSearch(query+" -tag:" + tagName))
+                item("crossed-star" , `${this.it[EXCLUDE]} #${tagName} ${this.it[FROM_SEARCH]}`, () => search.openGlobalSearch(query+" -tag:" + tagName))
             );
         }
 
@@ -267,9 +294,11 @@ class TagPageUIHandler extends Component {
         super();
         this.opts = opts
         this.plugin = plugin;
+
     }
 
     onload() {
+
         const {selector, container, hoverSource, toTag} = this.opts;
         this.register(
             // Show tag page on hover
