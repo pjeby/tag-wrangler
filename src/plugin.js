@@ -107,6 +107,13 @@ export default class TagWrangler extends Plugin {
                     title: tagName,
                     icon: "hashtag",
                 })
+                window.addEventListener("dragend", release, true);
+                window.addEventListener("drop", release, true);
+                function release() {
+                    app.dragManager.draggable = null;
+                    window.removeEventListener("dragend", release, true);
+                    window.removeEventListener("drop", release, true);
+                }
             }, {capture: false})
         );
 
