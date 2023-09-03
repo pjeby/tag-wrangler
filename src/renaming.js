@@ -1,12 +1,11 @@
-import {confirm} from "smalltalk";
 import {Progress} from "./progress";
-import {validatedInput} from "./validation";
+import {Prompt, Confirm} from "@ophidian/core";
 import {Notice, parseFrontMatterAliases, parseFrontMatterTags} from "obsidian";
 import {Tag, Replacement} from "./Tag";
 import {File} from "./File";
 
-export async function renameTag(app, tagName) {
-    const newName = await promptForNewName(tagName);
+export async function renameTag(app, tagName, toName=tagName) {
+    const newName = await promptForNewName(tagName, toName);
     if (newName === false) return;  // aborted
 
     if (!newName || newName === tagName) {
@@ -61,33 +60,32 @@ export async function findTargets(app, tag) {
         return targets;
 }
 
-async function promptForNewName(tagName) {
-    try {
-        return await validatedInput(
-            `Renaming #${tagName} (and any sub-tags)`, "Enter new name (must be a valid Obsidian tag):\n",
-            tagName,
-            "[^\u2000-\u206F\u2E00-\u2E7F'!\"#$%&()*+,.:;<=>?@^`{|}~\\[\\]\\\\\\s]+",
-            "Obsidian tag name"
-        );
-    } catch(e) {
-        return false;  // user cancelled
-    }
+async function promptForNewName(tagName, newName=tagName) {
+    return await new Prompt()
+        .setTitle(`Renaming #${tagName} (and any sub-tags)`)
+        .setContent("Enter new name (must be a valid Obsidian tag name):\n")
+        .setPattern("[^\u2000-\u206F\u2E00-\u2E7F'!\"#$%&()*+,.:;<=>?@^`{|}~\\[\\]\\\\\\s]+")
+        .onInvalidEntry(t => new Notice(`"${t}" is not a valid Obsidian tag name`))
+        .setValue(newName)
+        .prompt()
+    ;
 }
 
 async function shouldAbortDueToClash([origin, clash], oldTag, newTag) {
-    try {
-        await confirm(
-            "WARNING: No Undo!",
-            `Renaming <code>${oldTag}</code> to <code>${newTag}</code> will merge ${
-                (origin.canonical === oldTag.canonical) ?
-                    `these tags` : `multiple tags
-                    into existing tags (such as <code>${origin}</code>
-                    merging with <code>${clash}</code>)`
-            }.
-
-            This <b>cannot</b> be undone.  Do you wish to proceed?`
-        );
-    } catch(e) {
-        return true;
-    }
+    return !await new Confirm()
+        .setTitle("WARNING: No Undo!")
+        .setContent(
+            activeWindow.createEl("p", undefined, el => { el.innerHTML =
+                `Renaming <code>${oldTag}</code> to <code>${newTag}</code> will merge ${
+                    (origin.canonical === oldTag.canonical) ?
+                        `these tags` : `multiple tags
+                        into existing tags (such as <code>${origin}</code>
+                        merging with <code>${clash}</code>)`
+                }.<br><br>
+                This <b>cannot</b> be undone.  Do you wish to proceed?`;
+            })
+        )
+        .setup(c => c.okButton.addClass("mod-warning"))
+        .confirm()
+    ;
 }

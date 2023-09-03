@@ -7,10 +7,9 @@
   "license": "ISC",
   "devDependencies": {
     "monkey-around": "^2.3",
-    "obsidian": "^0.14.5",
-    "@ophidian/build": "^1.0.2",
+    "obsidian": "1.2.8",
+    "@ophidian/build": "^1.1.0",
     "@ophidian/core": "github:ophidian-lib/core",
-    "smalltalk": "github:pjeby/smalltalk.git#patch-1",
     "yaml": "2.0.0-10"
   }
 }

@@ -1,15 +1,29 @@
-import { progress } from "smalltalk";
+import { Dialog } from "@ophidian/core";
+
+class ProgressDialog extends Dialog {
+    progressEl = this.contentEl.createEl("progress", {value: 0, attr: {style: "width: 100%", max: 100}});
+    counterEl = this.contentEl.createDiv({text: "0%"});
+    setProgress(pct) {
+        this.counterEl.textContent = `${pct}%`;
+        this.progressEl.value = pct;
+    }
+    constructor(onClose) {
+        super();
+        this.okButton.detach();
+        this.addCancelButton();
+        this.onClose = onClose;
+    }
+}
 
 export class Progress {
+    aborted = false;
 
     constructor(title, message) {
-        this.progress = progress(title, message);
-        this.progress.catch(e => {
-            this.aborted = true;
-            if (e && (e.constructor !== Error || e.message !== "")) console.error(e);
-        });
-        this.dialog = this.progress.dialog;
-        this.aborted = false;
+        this.progress = new ProgressDialog(() => this.aborted = true)
+            .setTitle(title)
+            .setContent(message)
+        ;
+        this.progress.open();
     }
 
     async forEach(collection, func) {
@@ -32,18 +46,11 @@ export class Progress {
                 this.progress.setProgress(100);
             return this;
         } finally {
-            this.progress.remove();
+            this.progress.onClose = () => null;
+            this.progress.close();
         }
     }
 
-    set title(text) { this.dialog.querySelector("header").textContent = text; }
-    get title() { return this.dialog.querySelector("header").textContent; }
-
-    set message(text) {
-        const area = this.dialog.querySelector(".content-area").childNodes[0].textContent = text;
-    }
-
-    get message() {
-        return this.dialog.querySelector(".content-area").childNodes[0].textContent;
-    }
+    set title(text) { this.progress.setTitle(text); }
+    set message(text) { this.progress.setContent(text); }
 }
