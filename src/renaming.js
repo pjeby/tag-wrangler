@@ -64,7 +64,7 @@ async function promptForNewName(tagName, newName=tagName) {
     return await new Prompt()
         .setTitle(`Renaming #${tagName} (and any sub-tags)`)
         .setContent("Enter new name (must be a valid Obsidian tag name):\n")
-        .setPattern("[^\u2000-\u206F\u2E00-\u2E7F'!\"#$%&()*+,.:;<=>?@^`{|}~\\[\\]\\\\\\s]+")
+        .setPattern("[^\u2000-\u206F\u2E00-\u2E7F'!\"#$%&\\(\\)*+,.:;<=>?@^`\\{\\|\\}~\\[\\]\\\\\\s]+")
         .onInvalidEntry(t => new Notice(`"${t}" is not a valid Obsidian tag name`))
         .setValue(newName)
         .prompt()
