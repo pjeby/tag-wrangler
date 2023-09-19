@@ -44,7 +44,7 @@ export class Replacement {
             return tags.map((t, i) => {
                 if (skipOdd && (i & 1)) return t;   // leave odd entries (separators) alone
                 // Obsidian allows spaces as separators within array elements
-                if (!t) return t;
+                if (!t || typeof t !== "string") return t;
                 // Skip non-tag parts
                 if (isAlias) {
                     if (!t.startsWith("#") || !Tag.isTag(t)) return t;
