@@ -80,6 +80,15 @@ export default class TagWrangler extends Plugin {
         );
 
         this.addChild(
+            // Property view
+            new TagPageUIHandler(this, {
+                hoverSource: "preview", selector: '.metadata-property[data-property-key="tags"] .multi-select-pill-content',
+                container: ".metadata-properties",
+                toTag(el) { return el.textContent; }
+            })
+        );
+
+        this.addChild(
             // Edit mode
             new TagPageUIHandler(this, {
                 hoverSource: "editor", selector: "span.cm-hashtag",
