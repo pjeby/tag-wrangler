@@ -1,7 +1,8 @@
-import {Component, Keymap, Menu, Notice, parseFrontMatterAliases, Plugin, Scope} from "obsidian";
+import {Component, Keymap, Menu, Notice, parseFrontMatterAliases, Plugin} from "obsidian";
 import {renameTag, findTargets} from "./renaming";
 import {Tag} from "./Tag";
 import {around} from "monkey-around";
+import {Confirm} from "@ophidian/core";
 
 const tagHoverMain = "tag-wrangler:tag-pane";
 
@@ -47,7 +48,14 @@ export default class TagWrangler extends Plugin {
         app.workspace.trigger("tag-page:did-create", tp_evt);
     }
 
-    async onload(){
+    onload(){
+        this.registerEvent(
+            app.workspace.on("editor-menu", (menu, editor) => {
+                const token = editor.getClickableTokenAt(editor.getCursor());
+                if (token?.type === "tag") this.setupMenu(menu, token.text);
+            })
+        )
+
         this.register(
             onElement(document, "contextmenu", ".tag-pane-tag", this.onMenu.bind(this), {capture: true})
         );
@@ -117,6 +125,31 @@ export default class TagWrangler extends Plugin {
             }, {capture: false})
         );
 
+        const dropHandler = (e, targetEl, info = app.dragManager.draggable, drop) => {
+            if (info?.source !== "tag-wrangler" || e.defaultPrevented ) return;
+            const tag = targetEl.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent;
+            const dest = tag+"/"+Tag.toName(info.title).split("/").pop();
+            if (Tag.canonical(tag) === Tag.canonical(info.title)) return;
+            e.dataTransfer.dropEffect = "move";
+            e.preventDefault();
+            if (drop) {
+                this.rename(Tag.toName(info.title), dest);
+            } else {
+                app.dragManager.updateHover(targetEl, "is-being-dragged-over");
+                app.dragManager.setAction(`Rename to ${dest}`);
+            }
+        }
+
+        this.register(onElement(document.body, "dragover", ".tag-pane-tag.tree-item-self", dropHandler, {capture: true}));
+        this.register(onElement(document.body, "dragenter", ".tag-pane-tag.tree-item-self", dropHandler, {capture: true}));
+        // This has to be registered on the window so that it will still get the .draggable
+        this.registerDomEvent(window, "drop", e => {
+            const targetEl = e.target?.matchParent(".tag-pane-tag.tree-item-self", e.currentTarget);
+            if (!targetEl) return;
+            const info = app.dragManager.draggable;
+            if (info && !e.defaultPrevented) dropHandler(e, targetEl, info, true);
+        }, {capture: true});
+
         // Track Tag Pages
         const metaCache = this.app.metadataCache;
         const plugin = this;
@@ -177,57 +210,17 @@ export default class TagWrangler extends Plugin {
     }
 
     onMenu(e, tagEl) {
-        if (!e.obsidian_contextmenu) {
-            e.obsidian_contextmenu = new Menu(this.app);
+        let menu = e.obsidian_contextmenu;
+        if (!menu) {
+            menu = e.obsidian_contextmenu = new Menu();
             setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
         }
 
         const
             tagName = tagEl.find(".tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text").textContent,
-            tagPage = this.tagPage(tagName),
-            isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon"),
-            searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
-            search = searchPlugin && searchPlugin.instance,
-            query = search && search.getGlobalSearchQuery(),
-            random = this.app.plugins.plugins["smart-random-note"],
-            menu = e.obsidian_contextmenu.addItem(item("pencil", "Rename #"+tagName, () => this.rename(tagName)));
-
-        menu.addSeparator();
-        if (tagPage) {
-            menu.addItem(
-                item("popup-open", "Open tag page", (e) => this.openTagPage(tagPage, false, Keymap.isModEvent(e)))
-            )
-        } else {
-            menu.addItem(
-                item("create-new", "Create tag page", (e) => this.createTagPage(tagName, Keymap.isModEvent(e)))
-            )
-        }
-
-        if (search) {
-            menu.addSeparator().addItem(
-                item("magnifying-glass", "New search for #"+tagName, () => search.openGlobalSearch("tag:" + tagName))
-            );
-            if (query) {
-                menu.addItem(
-                    item("sheets-in-box", "Require #"+tagName+" in search"  , () => search.openGlobalSearch(query+" tag:"  + tagName))
-                );
-            }
-            menu.addItem(
-                item("crossed-star" , "Exclude #"+tagName+" from search", () => search.openGlobalSearch(query+" -tag:" + tagName))
-            );
-        }
-
-        if (random) {
-            menu.addSeparator().addItem(
-                item("dice", "Open random note", async () => {
-                    const targets = await findTargets(this.app, new Tag(tagName));
-                    random.openRandomNote(targets.map(f=> this.app.vault.getAbstractFileByPath(f.filename)));
-                })
-            );
-        }
-
-        this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, {search, query, isHierarchy, tagPage});
-
+            isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon")
+        ;
+        this.setupMenu(menu, tagName, isHierarchy);
         if (isHierarchy) {
             const
                 tagParent = tagName.split("/").slice(0, -1).join("/"),
@@ -237,10 +230,56 @@ export default class TagWrangler extends Plugin {
             function toggle(collapse) {
                 for(const tag of tagContainer.children ?? tagContainer.vChildren.children) tag.setCollapsed(collapse);
             }
-            menu.addSeparator()
-            .addItem(item("vertical-three-dots", "Collapse tags at this level", () => toggle(true )))
-            .addItem(item("expand-vertically"  , "Expand tags at this level"  , () => toggle(false)))
+            menu.addItem(item("tag-hierarchy", "vertical-three-dots", "Collapse tags at this level", () => toggle(true )))
+                .addItem(item("tag-hierarchy", "expand-vertically"  , "Expand tags at this level"  , () => toggle(false)))
         }
+    }
+
+    setupMenu(menu, tagName, isHierarchy=false) {
+        tagName = Tag.toTag(tagName).slice(1);
+        const
+            tagPage = this.tagPage(tagName),
+            searchPlugin = this.app.internalPlugins.getPluginById("global-search"),
+            search = searchPlugin && searchPlugin.instance,
+            query = search && search.getGlobalSearchQuery(),
+            random = this.app.plugins.plugins["smart-random-note"]
+        ;
+        menu.addItem(item("tag-rename", "pencil", "Rename #"+tagName, () => this.rename(tagName)))
+
+        if (tagPage) {
+            menu.addItem(
+                item("tag-page", "popup-open", "Open tag page", (e) => this.openTagPage(tagPage, false, Keymap.isModEvent(e)))
+            )
+        } else {
+            menu.addItem(
+                item("tag-page", "create-new", "Create tag page", (e) => this.createTagPage(tagName, Keymap.isModEvent(e)))
+            )
+        }
+
+        if (search) {
+            menu.addItem(
+                item("tag-search", "magnifying-glass", "New search for #"+tagName, () => search.openGlobalSearch("tag:#" + tagName))
+            );
+            if (query) {
+                menu.addItem(
+                    item("tag-search", "sheets-in-box", "Require #"+tagName+" in search"  , () => search.openGlobalSearch(query+" tag:#"  + tagName))
+                );
+            }
+            menu.addItem(
+                item("tag-search", "crossed-star" , "Exclude #"+tagName+" from search", () => search.openGlobalSearch(query+" -tag:#" + tagName))
+            );
+        }
+
+        if (random) {
+            menu.addItem(
+                item("tag-random", "dice", "Open random note", async () => {
+                    const targets = await findTargets(this.app, new Tag(tagName));
+                    random.openRandomNote(targets.map(f=> this.app.vault.getAbstractFileByPath(f.filename)));
+                })
+            );
+        }
+
+        this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, {search, query, isHierarchy, tagPage});
     }
 
     leafView(containerEl) {
@@ -252,18 +291,15 @@ export default class TagWrangler extends Plugin {
     }
 
 
-    async rename(tagName) {
-        const scope = new Scope;
-        this.app.keymap.pushScope(scope);
-        try { await renameTag(this.app, tagName); }
+    async rename(tagName, toName=tagName) {
+        try { await renameTag(this.app, tagName, toName); }
         catch (e) { console.error(e); new Notice("error: " + e); }
-        this.app.keymap.popScope(scope);
     }
 
 }
 
-function item(icon, title, click) {
-    return i => i.setIcon(icon).setTitle(title).onClick(click);
+function item(section, icon, title, click) {
+    return i => { i.setIcon(icon).setTitle(title).onClick(click); if (section) i.setSection(section); }
 }
 
 
@@ -288,18 +324,55 @@ class TagPageUIHandler extends Component {
                 });
             }, {capture: false})
         );
+
+        if (hoverSource === "preview") {
+            this.register(
+                onElement(document, "contextmenu", selector, (e, targetEl) => {
+                    let menu = e.obsidian_contextmenu;
+                    if (!menu) {
+                        menu = e.obsidian_contextmenu = new Menu();
+                        setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
+                    }
+                    this.plugin.setupMenu(menu, toTag(targetEl));
+                })
+            );
+            this.register(
+                onElement(document, "dragstart", selector, (event, targetEl) => {
+                    const tagName = toTag(targetEl);
+                    event.dataTransfer.setData("text/plain", Tag.toTag(tagName));
+                    app.dragManager.onDragStart(event, {
+                        source: "tag-wrangler",
+                        type: "text",
+                        title: tagName,
+                        icon: "hashtag",
+                    })
+                }, {capture: false})
+            );
+        }
+
         this.register(
             // Open tag page w/alt click (current pane) or ctrl/cmd/middle click (new pane)
-            onElement(document, "click", selector, (event, targetEl) => {
+            onElement(document, hoverSource === "editor" ? "mousedown" : "click", selector, (event, targetEl) => {
                 const {altKey} = event;
                 if (!Keymap.isModEvent(event) && !altKey) return;
                 const tagName = toTag(targetEl), tp = tagName && this.plugin.tagPage(tagName);
                 if (tp) {
                     this.plugin.openTagPage(tp, false, Keymap.isModEvent(event));
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return false;
+                } else {
+                    new Confirm()
+                        .setTitle("Create Tag Page")
+                        .setContent(`A tag page for ${tagName} does not exist.  Create it?`)
+                        .confirm()
+                        .then(v => {
+                            if (v) return this.plugin.createTagPage(tagName, Keymap.isModEvent(event));
+                            const search = app.internalPlugins.getPluginById("global-search")?.instance;
+                            search?.openGlobalSearch("tag:#" + tagName)
+                        })
+                    ;
                 }
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return false;
             }, {capture: true})
         );
     }

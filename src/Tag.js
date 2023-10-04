@@ -21,6 +21,10 @@ export class Tag {
         return name.startsWith("#") ? name : "#"+name;
     }
 
+    static toName(tag) {
+        return this.toTag(tag).slice(1);
+    }
+
     static canonical(name) {
         return Tag.toTag(name).toLowerCase();
     }
