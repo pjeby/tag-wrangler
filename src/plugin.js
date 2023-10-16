@@ -69,6 +69,13 @@ export default class TagWrangler extends Plugin {
                     const tagName = Tag.toTag(token.text).slice(1);
                     const tagPage = this.tagPage(tagName);
                     tagPage ? this.openTagPage(tagPage, false, false) : this.createTagPage(tagName, false);
+                } else if (token?.type === "internal-link") {
+                    const file = this.app.workspace.getActiveFile();
+                    if (file) {
+                        this.app.workspace.openLinkText(decodeURI(token.text), file.path, false, {active: true});
+                    }
+                } else if (token?.type === "external-link") {
+                    window.open(token.text);
                 }
             },
         });
