@@ -60,6 +60,19 @@ export default class TagWrangler extends Plugin {
             onElement(document, "contextmenu", ".tag-pane-tag", this.onMenu.bind(this), {capture: true})
         );
 
+        this.addCommand({
+            id: "tag-wrangler-open-or-create-tag-page",
+            name: "Open or create tag page",
+            editorCallback: (editor, view) => {
+                const token = editor.getClickableTokenAt(editor.getCursor());
+                if (token?.type === "tag") {
+                    const tagName = Tag.toTag(token.text).slice(1);
+                    const tagPage = this.tagPage(tagName);
+                    tagPage ? this.openTagPage(tagPage, false, false) : this.createTagPage(tagName, false);
+                }
+            },
+        });
+
         this.app.workspace.registerHoverLinkSource(tagHoverMain, {display: 'Tag pane', defaultMod: true});
 
         this.addChild(
