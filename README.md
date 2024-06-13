@@ -1,11 +1,11 @@
 # Obsidian Tag Wrangler Plugin
 > NEW in 0.6.0
-> - Open or create a tag page by alt/opt clicking a tag in any note (or the tag pane)
+> - Open or create a tag page by alt/opt clicking a tag in any note (or the tags view)
 > - Use the Tag Wrangler context menu for tags in the body of a note (editor or preview mode)
 > - Drag-and-drop tags to rename/reorganize them
-> - Drag tags from the tag pane or a note preview to an editor pane to insert them as text.
+> - Drag tags from the tags view or a note preview to an editor pane to insert them as text.
 
-This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.md) tag pane, with the following actions available:
+This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.md) tags view, with the following actions available:
 
 ![Image of tag wrangler's context menu](https://raw.githubusercontent.com/pjeby/tag-wrangler/master/contextmenu.png)
 
@@ -15,10 +15,10 @@ This plugin adds a context menu for tags in the [Obsidian.md](https://obsidian.m
 * Add the tag as a requirement (`tag:#whatever`) to the current search
 * Add an exclusion for the tag (`-tag:#whatever`) to the current search
 * Open a random note with that tag (if you have the [Smart Random Note](https://github.com/erichalldev/obsidian-smart-random-note/) plugin installed and enabled)
-* Collapse all tags at the same level in the tag pane
-* Expand all tags at the same level in the tag pane
+* Collapse all tags at the same level in the tags view
+* Expand all tags at the same level in the tags view
 
-Depending on the current state of the search and tag panes, some actions may not be available.  (e.g. expand and collapse are only available when the tag pane is showing tags in a hierarchy.)
+Depending on the current state of the search and tag views, some actions may not be available.  (e.g. expand and collapse are only available when the tags view is showing tags in a hierarchy.)
 
 **Please note**: renaming a tag is potentially an irreversible operation: you may wish to back up your data before beginning a rename.  See the section on [Renaming tags](#renaming-tags) below for more information.
 
@@ -28,7 +28,7 @@ Depending on the current state of the search and tag panes, some actions may not
 
 Search for "tag wrangler" in Obsidian's Community Plugins interface, or [click here](https://obsidian-plugins.peak-dev.org/show/tag-wrangler) to open it in your most-recently-used vault.  (Then select "Install" and "Enable".)
 
-Also, make sure that you have enabled the "Tag Pane" plugin, in the "Core Plugins" section of your vault's configuration.  This plugin adds a context menu to the pane provided by that plugin, and does not have any UI of its own.
+Also, make sure that you have enabled the "Tags View" plugin, in the "Core Plugins" section of your vault's configuration.  This plugin adds a context menu to the pane provided by that plugin, and does not have any UI of its own.
 
 
 
@@ -36,13 +36,13 @@ Also, make sure that you have enabled the "Tag Pane" plugin, in the "Core Plugin
 
 People often debate the merits of using tags vs. page links to organize your notes.  With tag pages, you can combine the best of both worlds: the visibility and fluid entry of tags, plus the centralized content and outbound linking of a page.
 
-To create a tag page, just right click any tag in the tag pane, then select "Create Tag Page".  A new note will be created with an alias of the selected tag.  You can rename the note or move it anywhere you like in the vault, as long as it retains the alias linking it to the tag.  (Renaming a tag associated with a tag page (see "Renaming Tags", below) will automatically update the alias.)
+To create a tag page, just right click any tag in the tags view, then select "Create Tag Page".  A new note will be created with an alias of the selected tag.  You can rename the note or move it anywhere you like in the vault, as long as it retains the alias linking it to the tag.  (Renaming a tag associated with a tag page (see "Renaming Tags", below) will automatically update the alias.)
 
-To open or create a tag page, you can Alt-click (Option-click on Mac) any tag in the tag pane or any note, whether in editing or reading view.  Ctrl/Cmd-click or middle click plus Alt/Option will open the tag page in a new pane.  (Note: if no tag page exists, you'll be prompted for whether you want to create it.  If you cancel, the normal click behavior of globally searching for the tag will apply.)
+To open or create a tag page, you can Alt-click (Option-click on Mac) any tag in the tags view or any note, whether in editing or reading view.  Ctrl/Cmd-click or middle click plus Alt/Option will open the tag page in a new pane.  (Note: if no tag page exists, you'll be prompted for whether you want to create it.  If you cancel, the normal click behavior of globally searching for the tag will apply.)
 
-Or, you can enter the tag's name in the Obsidian "quick switcher" (default hotkey: Ctrl/Cmd-O) to open the page from the keyboard.  You can also hover-preview any tag in the tag pane or any markdown views to pop up a preview of the tag page.
+Or, you can enter the tag's name in the Obsidian "quick switcher" (default hotkey: Ctrl/Cmd-O) to open the page from the keyboard.  You can also hover-preview any tag in the tags view or any markdown views to pop up a preview of the tag page.
 
-(If you're not familiar with hover-previewing, the basic idea is that by holding the Ctrl/Cmd key while moving the mouse pointer over an item in Obsidian, a popup will often appear with a small version of the relevant page.  You can also go into the settings for the built-in "Page Preview" plugin and selectively disable the need for using the Ctrl/Cmd key, if you prefer to just hover without it.  Tag Wrangler respects your existing settings for hovering links in Editor and Preview views, and adds an extra setting for "Tag Pane" that controls whether it will require the Ctrl/Cmd key when hovering tags in the tag pane.)
+(If you're not familiar with hover-previewing, the basic idea is that by holding the Ctrl/Cmd key while moving the mouse pointer over an item in Obsidian, a popup will often appear with a small version of the relevant page.  You can also go into the settings for the built-in "Page Preview" plugin and selectively disable the need for using the Ctrl/Cmd key, if you prefer to just hover without it.  Tag Wrangler respects your existing settings for hovering links in Editor and Preview views, and adds an extra setting for "Tags View" that controls whether it will require the Ctrl/Cmd key when hovering tags in the tags view.)
 
 Tag Wrangler does not (yet) support automatic conversion of tag references to page links or vice versa, though it may in a future version.  In the meantime, however, you can use Obsidian's backlinks to find and change such references from the tag page.  Specifically, viewing a tag page's "unlinked mentions" will show you all the locations where the tag was used and "link" buttons you can use to convert them to page links.  (Converting page links to tags requires hand editing.)
 
@@ -114,17 +114,17 @@ The indentation issue has been reported to the upstream library, and hopefully t
 
 ### Case Insensitivity
 
-Tag Wrangler uses the same case-insensitive comparison as Obsidian when matching tags to change, and checking for clashes.  Please note, however, that because Obsidian uses the *first* occurrence of a tag to determine how it is displayed in the tag pane, renaming tags without consistent upper/lowercase usage may result in *apparent* changes to the names of "other" tags in the tag pane.
+Tag Wrangler uses the same case-insensitive comparison as Obsidian when matching tags to change, and checking for clashes.  Please note, however, that because Obsidian uses the *first* occurrence of a tag to determine how it is displayed in the tags view, renaming tags without consistent upper/lowercase usage may result in *apparent* changes to the names of "other" tags in the tags view.
 
-Let's say you have a tag named `#foo/bar` and you rename `#foo` to `#Bar/baz`.  But in the meantime, you already *had* a tag called `#bar/bell`.  This *might* cause you to now see that tag displayed in the tag pane as `#Bar/bell`, even though Tag Wrangler did not actually replace any existing `#bar/bell` tags in your text!  (As you will see if you search for them.)
+Let's say you have a tag named `#foo/bar` and you rename `#foo` to `#Bar/baz`.  But in the meantime, you already *had* a tag called `#bar/bell`.  This *might* cause you to now see that tag displayed in the tags view as `#Bar/bell`, even though Tag Wrangler did not actually replace any existing `#bar/bell` tags in your text!  (As you will see if you search for them.)
 
-Rather, this kind of thing will happen if the `#Bar/baz` tag is the first tag beginning with some variant of `bar` that Obsidian encounters when generating the tag pane.  Obsidian just uses the first-encountered string of a particular case as the "display name" for the tag, and then counts all subsequent occurrences as the same tag.
+Rather, this kind of thing will happen if the `#Bar/baz` tag is the first tag beginning with some variant of `bar` that Obsidian encounters when generating the tags view.  Obsidian just uses the first-encountered string of a particular case as the "display name" for the tag, and then counts all subsequent occurrences as the same tag.
 
-This is just how Obsidian tags work, and not something that Tag Wrangler can work around.  But you can easily fix the problem by renaming anything that's in the "wrong" case to the "right" case.  It just means that (as is already the case in Obsidian) you can't have more than one casing of the same tag name displayed in the tag pane, and that now you can easily rename tags to a consistent casing, if desired.
+This is just how Obsidian tags work, and not something that Tag Wrangler can work around.  But you can easily fix the problem by renaming anything that's in the "wrong" case to the "right" case.  It just means that (as is already the case in Obsidian) you can't have more than one casing of the same tag name displayed in the tags view, and that now you can easily rename tags to a consistent casing, if desired.
 
 ### Canvas Support
 
-Please note that tag renaming is not supported for tags in Obsidian Canvas files yet, as Obsidian itself doesn't fully support such tags yet either.  (That is, tags in canvas text do *not* appear in the tag pane counts or in Obsidian's internal indexes, so from Tag Wrangler's perspective they aren't findable and don't exist.)  If some future version of Obsidian addresses this, this limitation *may* be removable then, depending on how the issue is addressed.
+Please note that tag renaming is not supported for tags in Obsidian Canvas files yet, as Obsidian itself doesn't fully support such tags yet either.  (That is, tags in canvas text do *not* appear in the tags view counts or in Obsidian's internal indexes, so from Tag Wrangler's perspective they aren't findable and don't exist.)  If some future version of Obsidian addresses this, this limitation *may* be removable then, depending on how the issue is addressed.
 
 
 
@@ -139,7 +139,7 @@ This event allows other plugins to add menu items to the Tag Wrangler context me
 ```typescript
 type menuInfo = {
   query?: string           // the current global search query
-  isHierarchy: boolean     // true if the tag is a child tag in the tag pane (sorted by hierarchy)
+  isHierarchy: boolean     // true if the tag is a child tag in the tags view (sorted by hierarchy)
   tagPage: TFile|undefined // the tag page for the note, if it exists
 };
 

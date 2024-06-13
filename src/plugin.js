@@ -60,10 +60,10 @@ export default class TagWrangler extends Plugin {
             onElement(document, "contextmenu", ".tag-pane-tag", this.onMenu.bind(this), {capture: true})
         );
 
-        this.app.workspace.registerHoverLinkSource(tagHoverMain, {display: 'Tag pane', defaultMod: true});
+        this.app.workspace.registerHoverLinkSource(tagHoverMain, {display: 'Tags View', defaultMod: true});
 
         this.addChild(
-            // Tags in the tag pane
+            // Tags in the tags view
             new TagPageUIHandler(this, {
                 hoverSource: tagHoverMain, selector: ".tag-pane-tag", container: ".tag-container",
                 toTag(el) { return el.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent; }
