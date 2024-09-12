@@ -44,7 +44,9 @@ Or, you can enter the tag's name in the Obsidian "quick switcher" (default hotke
 
 (If you're not familiar with hover-previewing, the basic idea is that by holding the Ctrl/Cmd key while moving the mouse pointer over an item in Obsidian, a popup will often appear with a small version of the relevant page.  You can also go into the settings for the built-in "Page Preview" plugin and selectively disable the need for using the Ctrl/Cmd key, if you prefer to just hover without it.  Tag Wrangler respects your existing settings for hovering links in Editor and Preview views, and adds an extra setting for "Tags View" that controls whether it will require the Ctrl/Cmd key when hovering tags in the tags view.)
 
-Tag Wrangler does not (yet) support automatic conversion of tag references to page links or vice versa, though it may in a future version.  In the meantime, however, you can use Obsidian's backlinks to find and change such references from the tag page.  Specifically, viewing a tag page's "unlinked mentions" will show you all the locations where the tag was used and "link" buttons you can use to convert them to page links.  (Converting page links to tags requires hand editing.)
+Tag Wrangler does not (yet) support automatic conversion of tag references to page links or vice versa, though it may in a future version.  In the meantime, however, you can use Obsidian's backlinks to find and change such references from the tag page.  Specifically, viewing a tag page's "unlinked mentions" will show you all the locations where the tag was used in the body of a note, and "link" buttons you can use to convert them to page links.  (Converting page links to tags requires hand editing.)
+
+(Note: to see "unlinked mentions", you have to click the part of the backlinks pane that says "unlinked mentions" to perform the search, as it's not done by default.  Also, the Obsidian unlinked mentions feature does not support the tags *property*, only tags used in the note body.)
 
 
 
