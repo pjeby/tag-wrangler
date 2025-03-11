@@ -2,7 +2,7 @@ import {Component, Keymap, Menu, Notice, parseFrontMatterAliases, Plugin} from "
 import {renameTag, findTargets} from "./renaming";
 import {Tag} from "./Tag";
 import {around} from "monkey-around";
-import {Confirm} from "@ophidian/core";
+import {Confirm, use} from "@ophidian/core";
 
 const tagHoverMain = "tag-wrangler:tag-pane";
 
@@ -12,6 +12,7 @@ function onElement(el, event, selector, callback, options) {
 }
 
 export default class TagWrangler extends Plugin {
+    use = use.plugin(this);
     pageAliases = new Map();
     tagPages = new Map();
 
@@ -84,6 +85,7 @@ export default class TagWrangler extends Plugin {
             new TagPageUIHandler(this, {
                 hoverSource: "preview", selector: '.metadata-property[data-property-key="tags"] .multi-select-pill-content',
                 container: ".metadata-properties",
+                mergeMenu: true,
                 toTag(el) { return el.textContent; }
             })
         );
@@ -322,7 +324,7 @@ class TagPageUIHandler extends Component {
     }
 
     onload() {
-        const {selector, container, hoverSource, toTag} = this.opts;
+        const {selector, container, hoverSource, toTag, mergeMenu } = this.opts;
         this.register(
             // Show tag page on hover
             onElement(document, "mouseover", selector, (event, targetEl) => {
@@ -334,16 +336,31 @@ class TagPageUIHandler extends Component {
             }, {capture: false})
         );
 
+        const self = this;
+
         if (hoverSource === "preview") {
             this.register(
                 onElement(document, "contextmenu", selector, (e, targetEl) => {
+                    if (mergeMenu) {
+                        const remove = around(Menu.prototype, {
+                            showAtPosition(old) {
+                                return function (...args) {
+                                    remove();
+                                    self.plugin.setupMenu(this, toTag(targetEl));
+                                    return old.apply(this, args);
+                                }
+                            }
+                        });
+                        setTimeout(remove, 0);
+                        return
+                    }
                     let menu = e.obsidian_contextmenu;
                     if (!menu) {
                         menu = e.obsidian_contextmenu = new Menu();
                         setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
                     }
                     this.plugin.setupMenu(menu, toTag(targetEl));
-                })
+                }, {capture: !!mergeMenu})
             );
             this.register(
                 onElement(document, "dragstart", selector, (event, targetEl) => {
@@ -363,17 +380,18 @@ class TagPageUIHandler extends Component {
             // Open tag page w/alt click (current pane) or ctrl/cmd/middle click (new pane)
             onElement(document, hoverSource === "editor" ? "mousedown" : "click", selector, (event, targetEl) => {
                 const {altKey} = event;
-                if (!Keymap.isModEvent(event) && !altKey) return;
+                const isMod = Keymap.isModEvent(event);
+                if (!isMod && !altKey) return;
                 const tagName = toTag(targetEl), tp = tagName && this.plugin.tagPage(tagName);
                 if (tp) {
-                    this.plugin.openTagPage(tp, false, Keymap.isModEvent(event));
+                    this.plugin.openTagPage(tp, false, isMod);
                 } else {
                     new Confirm()
                         .setTitle("Create Tag Page")
                         .setContent(`A tag page for ${tagName} does not exist.  Create it?`)
                         .confirm()
                         .then(v => {
-                            if (v) return this.plugin.createTagPage(tagName, Keymap.isModEvent(event));
+                            if (v) return this.plugin.createTagPage(tagName, isMod);
                             const search = app.internalPlugins.getPluginById("global-search")?.instance;
                             search?.openGlobalSearch("tag:#" + tagName)
                         })

@@ -5,11 +5,13 @@
     "build": "node ophidian.config.mjs production"
   },
   "license": "ISC",
+  "packageManager": "pnpm@7.33.6",
   "devDependencies": {
-    "monkey-around": "^2.3",
-    "obsidian": "1.2.8",
-    "@ophidian/build": "^1.1.0",
+    "monkey-around": "^3",
+    "obsidian": "1.3.5",
+    "@ophidian/build": "^1.2",
     "@ophidian/core": "github:ophidian-lib/core",
+    "uneventful": "^0.0.10",
     "yaml": "2.0.0-10"
   }
 }
