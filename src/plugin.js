@@ -83,7 +83,7 @@ export default class TagWrangler extends Plugin {
         this.addChild(
             // Property view
             new TagPageUIHandler(this, {
-                hoverSource: "preview", selector: '.metadata-property[data-property-key="tags"] .multi-select-pill-content',
+                hoverSource: "preview", selector: '.metadata-property[data-property-key="tags"] .multi-select-pill',
                 container: ".metadata-properties",
                 mergeMenu: true,
                 toTag(el) { return el.textContent; }
