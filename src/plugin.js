@@ -221,12 +221,7 @@ export default class TagWrangler extends Plugin {
     }
 
     onMenu(e, tagEl) {
-        let menu = e.obsidian_contextmenu;
-        if (!menu) {
-            menu = e.obsidian_contextmenu = new Menu();
-            setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
-        }
-
+        let menu = menuForEvent(e);
         const
             tagName = tagEl.find(".tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text").textContent,
             isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon")
@@ -351,15 +346,22 @@ class TagPageUIHandler extends Component {
                                 }
                             }
                         });
+                        if (Menu.forEvent) {
+                            const remove2 = around(Menu, {forEvent(old) { return function (ev) {
+                                const m = old.call(this, e);
+                                if (ev === e) {
+                                    self.plugin.setupMenu(m, toTag(targetEl));
+                                    remove();
+                                }
+                                remove2()
+                                return m;
+                            }}})
+                            setTimeout(remove2, 0);
+                        }
                         setTimeout(remove, 0);
                         return
                     }
-                    let menu = e.obsidian_contextmenu;
-                    if (!menu) {
-                        menu = e.obsidian_contextmenu = new Menu();
-                        setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
-                    }
-                    this.plugin.setupMenu(menu, toTag(targetEl));
+                    this.plugin.setupMenu(menuForEvent(e), toTag(targetEl));
                 }, {capture: !!mergeMenu})
             );
             this.register(
@@ -403,4 +405,16 @@ class TagPageUIHandler extends Component {
             }, {capture: true})
         );
     }
+}
+
+function menuForEvent(e) {
+    if (Menu.forEvent) {
+        return e.obsidian_contextmenu ||= Menu.forEvent(e)
+    }
+    let menu = e.obsidian_contextmenu;
+    if (!menu) {
+        menu = e.obsidian_contextmenu = new Menu();
+        setTimeout(() => menu.showAtPosition({x: e.pageX, y: e.pageY}), 0);
+    }
+    return menu
 }
