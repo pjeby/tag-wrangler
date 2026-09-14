@@ -60,6 +60,35 @@ export async function findTargets(app, tag) {
         return targets;
 }
 
+export async function renameTagHeadless(app, tagName, newName) {
+    if (!newName || newName === tagName) {
+        return "Unchanged or empty tag: No changes made.";
+    }
+
+    const oldTag  = new Tag(tagName);
+    const newTag  = new Tag(newName);
+    const replace = new Replacement(oldTag, newTag);
+
+    const targets = await findTargets(app, oldTag);
+    if (!targets || !targets.length) {
+        return "No files found with tag #" + tagName;
+    }
+
+    let renamed = 0;
+    const errors = [];
+    for (const target of targets) {
+        try {
+            if (await target.renamed(replace)) renamed++;
+        } catch (e) {
+            errors.push(target.filename + ": " + e.message);
+        }
+    }
+
+    let result = renamed + " file(s) updated";
+    if (errors.length) result += "\nErrors: " + errors.join("; ");
+    return result;
+}
+
 async function promptForNewName(tagName, newName=tagName) {
     return await new Prompt()
         .setTitle(`Renaming #${tagName} (and any sub-tags)`)
