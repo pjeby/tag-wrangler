@@ -1,5 +1,5 @@
 import {Component, Keymap, Menu, Notice, parseFrontMatterAliases, Plugin} from "obsidian";
-import {renameTag, findTargets} from "./renaming";
+import {renameTag, renameTagHeadless, findTargets, findTagFiles} from "./renaming";
 import {Tag} from "./Tag";
 import {around} from "monkey-around";
 import {Confirm, use, app} from "@ophidian/core";
@@ -51,6 +51,9 @@ export default class TagWrangler extends Plugin {
     }
 
     onload(){
+        window.renameTag = (old, neu, opts) => this.renameHeadless(old, neu, opts);
+        window.findTagFiles = (tag) => findTagFiles(this.app, tag);
+
         this.registerEvent(
             app.workspace.on("editor-menu", (menu, editor) => {
                 const token = editor.getClickableTokenAt(editor.getCursor());
@@ -301,6 +304,15 @@ export default class TagWrangler extends Plugin {
     async rename(tagName, toName=tagName) {
         try { await renameTag(this.app, tagName, toName); }
         catch (e) { console.error(e); new Notice("error: " + e); }
+    }
+
+    async renameHeadless(tagName, newName, options) {
+        try { return await renameTagHeadless(this.app, tagName, newName, options); }
+        catch (e) { console.error(e); return {success: false, renamed: 0, message: e.message}; }
+    }
+
+    findTagFiles(tagName) {
+        return findTagFiles(this.app, tagName);
     }
 
 }
