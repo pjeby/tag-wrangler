@@ -60,18 +60,39 @@ export async function findTargets(app, tag) {
         return targets;
 }
 
-export async function renameTagHeadless(app, tagName, newName) {
+/**
+ * Rename a tag programmatically without UI dialogs.
+ * Uses the same Tag/Replacement/File internals as the interactive rename.
+ *
+ * @param {App} app - Obsidian App instance
+ * @param {string} tagName - tag to rename (without #)
+ * @param {string} newName - new tag name (without #)
+ * @param {Object} [options]
+ * @param {boolean} [options.force=false] - proceed even if renaming would merge into an existing tag
+ * @returns {Promise<{success: boolean, renamed: number, message: string, merge?: {from: string, into: string}, errors?: string[]}>}
+ */
+export async function renameTagHeadless(app, tagName, newName, {force = false} = {}) {
     if (!newName || newName === tagName) {
-        return "Unchanged or empty tag: No changes made.";
+        return {success: false, renamed: 0, message: "Unchanged or empty tag: No changes made."};
     }
 
     const oldTag  = new Tag(tagName);
     const newTag  = new Tag(newName);
     const replace = new Replacement(oldTag, newTag);
 
+    const clashing = replace.willMergeTags(allTags(app).reverse());
+    if (clashing && !force) {
+        const [origin, clash] = clashing;
+        return {
+            success: false, renamed: 0,
+            message: `Would merge ${origin} into ${clash}. Pass {force: true} to proceed.`,
+            merge: {from: origin.name, into: clash.name}
+        };
+    }
+
     const targets = await findTargets(app, oldTag);
     if (!targets || !targets.length) {
-        return "No files found with tag #" + tagName;
+        return {success: true, renamed: 0, message: "No files found with tag #" + tagName};
     }
 
     let renamed = 0;
@@ -84,9 +105,28 @@ export async function renameTagHeadless(app, tagName, newName) {
         }
     }
 
-    let result = renamed + " file(s) updated";
-    if (errors.length) result += "\nErrors: " + errors.join("; ");
+    const result = {success: true, renamed, message: renamed + " file(s) updated"};
+    if (errors.length) result.errors = errors;
     return result;
+}
+
+/**
+ * Find all files containing a tag (including sub-tags), without UI progress bar.
+ *
+ * @param {App} app - Obsidian App instance
+ * @param {string} tagName - tag to search for (without #)
+ * @returns {string[]} array of file paths
+ */
+export function findTagFiles(app, tagName) {
+    const tag = new Tag(tagName);
+    const files = [];
+    for (const filename of app.metadataCache.getCachedFiles()) {
+        const {frontmatter, tags} = app.metadataCache.getCache(filename) || {};
+        const inlineTags = (tags || []).filter(t => t.tag && tag.matches(t.tag));
+        const fmTags = (parseFrontMatterTags(frontmatter) || []).filter(tag.matches);
+        if (inlineTags.length || fmTags.length) files.push(filename);
+    }
+    return files;
 }
 
 async function promptForNewName(tagName, newName=tagName) {
